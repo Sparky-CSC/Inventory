@@ -229,6 +229,14 @@ so reprint labels when convenient — new labels point at this site.
 
 ## 6. Everyday notes
 
+- **Labels and hang tags.** *Print Labels* in the sidebar (or *Print Tags* /
+  *Print Hang Tag* on items) opens the label designer: pick items, a size —
+  hang tags on cardstock, Avery sticker sheets (5160, 5161, 5163, 5164, 5167,
+  22806, business-card 5371/8371), label printers (DYMO, Zebra, Rollo,
+  Brother) or a custom size — and what goes on each label (QR code, barcode,
+  name, UID, location, category, size and colour, condition, heading, logo).
+  "Start at label" reuses part-used sheets; "Nudge" fixes printer alignment.
+  Print with Scale 100%, no margins and headers/footers off.
 - **Back up.** Administration → Data & Backup → *Download backup* gives you one
   file with every record. In this-device mode this is essential: clearing the
   browser's data erases the inventory.

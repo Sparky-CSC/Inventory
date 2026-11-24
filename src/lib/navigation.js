@@ -2,7 +2,7 @@
 // itself and by Settings → "Customize Sidebar Order".
 
 import {
-  LayoutDashboard, Package, List, Home, Search as SearchIcon, Truck, ArrowRightLeft, Bell,
+  LayoutDashboard, Package, List, Home, Search as SearchIcon, Truck, ArrowRightLeft, Bell, Tags,
 } from 'lucide-react';
 
 export const MAIN_NAV_LINKS = [
@@ -14,6 +14,7 @@ export const MAIN_NAV_LINKS = [
   { name: 'Rentals', page: 'RentalsDashboard', icon: Truck },
   { name: 'Borrowed Items', page: 'BorrowedItems', icon: ArrowRightLeft },
   { name: 'Reminders', page: 'RemindersManager', icon: Bell },
+  { name: 'Print Labels', page: 'PrintHangTags', icon: Tags },
 ];
 
 // Pages that can be chosen as the first page after signing in.
