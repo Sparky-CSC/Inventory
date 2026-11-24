@@ -501,10 +501,8 @@ values
       'permissions', jsonb_build_array(
         'manage_users', 'manage_settings', 'create_items', 'edit_items', 'delete_items',
         'view_items', 'manage_categories', 'manage_locations', 'manage_containers',
-        'manage_borrowed_items', 'view_reports', 'print_labels', 'manage_productions',
-        'manage_expendables', 'manage_front_of_house', 'manage_box_office',
-        'manage_voice_channels', 'join_voice_channels', 'send_messages', 'view_messages',
-        'manage_call_board', 'manage_rentals', 'delete_rentals'
+        'manage_borrowed_items', 'print_labels', 'manage_expendables',
+        'manage_rentals', 'delete_rentals'
       ),
       'is_system_role', true,
       'is_active', true,
@@ -525,6 +523,35 @@ values
     'system'
   )
 on conflict (entity, id) do nothing;
+
+-- Remove permissions left over from features the app no longer has
+-- (voice channels, messages, call board, front of house, box office,
+-- productions, reports) from any role that still lists them.
+update public.records
+set data = jsonb_set(
+  data, '{permissions}',
+  coalesce((
+    select jsonb_agg(p)
+    from jsonb_array_elements_text(data->'permissions') as p
+    where p in (
+      'manage_users', 'manage_settings', 'create_items', 'edit_items', 'delete_items',
+      'view_items', 'manage_categories', 'manage_locations', 'manage_containers',
+      'manage_borrowed_items', 'print_labels', 'manage_expendables',
+      'manage_rentals', 'delete_rentals'
+    )
+  ), '[]'::jsonb)
+)
+where entity = 'UserRole'
+  and jsonb_typeof(data->'permissions') = 'array'
+  and exists (
+    select 1 from jsonb_array_elements_text(data->'permissions') as p
+    where p not in (
+      'manage_users', 'manage_settings', 'create_items', 'edit_items', 'delete_items',
+      'view_items', 'manage_categories', 'manage_locations', 'manage_containers',
+      'manage_borrowed_items', 'print_labels', 'manage_expendables',
+      'manage_rentals', 'delete_rentals'
+    )
+  );
 
 
 -- ----------------------------------------------------------------------------

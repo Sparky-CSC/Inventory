@@ -24,16 +24,8 @@
               "my_items",
               "borrowed_items",
               "favorites",
-              "notifications",
-              "callboard",
-              "calendar",
-              "voice_channels",
-              "messages"
+              "notifications"
             ]
-          },
-          "production_id": {
-            "type": "string",
-            "description": "ID of the production this widget is linked to. Null for global widgets."
           },
           "position": {
             "type": "object",
@@ -124,15 +116,8 @@
                   "my_items",
                   "borrowed_items",
                   "favorites",
-                  "notifications",
-                  "callboard",
-                  "calendar",
-                  "voice_channels",
-                  "messages"
+                  "notifications"
                 ]
-              },
-              "production_id": {
-                "type": "string"
               },
               "position": {
                 "type": "object",

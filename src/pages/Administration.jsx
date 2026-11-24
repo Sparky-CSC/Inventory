@@ -44,7 +44,7 @@ import DataTools from '../components/admin/DataTools';
 import { useUserData } from '../components/shared/UserDataContext';
 import { isAdminUser } from '@/lib/permissions';
 import { getAppUrl } from '@/utils';
-import { IS_LOCAL_MODE } from '@/api/config';
+import { IS_LOCAL_MODE, ALL_PERMISSIONS } from '@/api/config';
 import { Mail, Link as LinkIcon, ShieldAlert } from 'lucide-react';
 
 // Main Administration Component
@@ -620,31 +620,7 @@ function RoleManagement() {
   
   const { register, handleSubmit, control, reset, setValue, formState: { errors } } = useForm();
 
-  const permissionsList = [
-    "manage_users", 
-    "manage_settings", 
-    "create_items", 
-    "edit_items", 
-    "delete_items", 
-    "view_items", 
-    "manage_categories", 
-    "manage_locations", 
-    "manage_containers", 
-    "manage_borrowed_items", 
-    "view_reports", 
-    "print_labels", 
-    "manage_productions", 
-    "manage_expendables", 
-    "manage_front_of_house", 
-    "manage_box_office",
-    "manage_voice_channels", 
-    "join_voice_channels",
-    "send_messages",
-    "view_messages",
-    "manage_call_board",
-    "manage_rentals",
-    "delete_rentals"
-  ];
+  const permissionsList = ALL_PERMISSIONS;
 
   // Roles to be removed from system management
   const rolesToRemoveFromSystem = [
@@ -685,7 +661,22 @@ function RoleManagement() {
   const loadRoles = useCallback(async () => {
     setIsLoading(true);
     try {
-      const rolesData = await UserRole.list();
+      let rolesData = await UserRole.list();
+
+      // Strip permissions left over from features the app no longer has
+      // (voice channels, messages, front of house, box office and so on).
+      const staleRoles = rolesData.filter(role =>
+        (role.permissions || []).some(p => !ALL_PERMISSIONS.includes(p))
+      );
+      if (staleRoles.length > 0) {
+        await Promise.all(staleRoles.map(role =>
+          UserRole.update(role.id, {
+            permissions: role.permissions.filter(p => ALL_PERMISSIONS.includes(p)),
+          })
+        ));
+        rolesData = await UserRole.list();
+      }
+
       setRoles(rolesData);
       
       // Check for specific roles to remove

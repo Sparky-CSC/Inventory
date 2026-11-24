@@ -55,7 +55,7 @@ export const ENTITY_NAMES = [
 // Fields the system manages itself on every record.
 export const SYSTEM_FIELDS = ['id', 'created_date', 'updated_date', 'created_by'];
 
-// Built-in roles created the first time the app runs.
+// Every permission a role can have. These match the features the app has.
 export const ALL_PERMISSIONS = [
   'manage_users',
   'manage_settings',
@@ -67,20 +67,13 @@ export const ALL_PERMISSIONS = [
   'manage_locations',
   'manage_containers',
   'manage_borrowed_items',
-  'view_reports',
   'print_labels',
-  'manage_productions',
   'manage_expendables',
-  'manage_front_of_house',
-  'manage_box_office',
-  'manage_voice_channels',
-  'join_voice_channels',
-  'send_messages',
-  'view_messages',
-  'manage_call_board',
   'manage_rentals',
   'delete_rentals',
 ];
+
+// Built-in roles created the first time the app runs.
 
 export const ADMIN_ROLE_ID = 'role_admin';
 export const USER_ROLE_ID = 'role_user';
