@@ -44,6 +44,8 @@ const DEFAULT_SETTINGS = {
   nudgeX: 0,
   nudgeY: 0,
   cutLines: true,
+  rollLengths: {}, // chosen tag length per continuous-roll size
+  receiptStrip: false, // receipt printers: one continuous strip instead of one tag per page
 };
 
 function loadSettings() {
@@ -114,7 +116,10 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
   // --- type sizes (points) -------------------------------------------------
   let nameSize = clamp(Math.min(textH * 72 * 0.2, textW * 72 / 7), 5.5, 22);
   const infoSize = clamp(nameSize * 0.68, 4.5, 12);
-  const codeTextSize = clamp(infoSize * 0.95, 4.5, 11);
+  // The UID under the code shrinks so it always fits on one line
+  // (monospace letters are about 0.6 of the type size wide).
+  const codeText = String(showBarcode ? itemBarcodeData(item) : item.uid || '');
+  const codeTextSize = clamp(Math.min(infoSize * 0.95, (textW * 72) / (Math.max(codeText.length, 1) * 0.7)), 4, 11);
   const lineH = (pt, spacing) => (pt * spacing) / 72; // inches per line
 
   // --- lines of information -------------------------------------------------
@@ -177,7 +182,8 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
         background: '#fff',
         color: '#000',
         fontFamily: 'Arial, Helvetica, sans-serif',
-        border: showCutLine ? '1px dashed #9ca3af' : 'none',
+        ...(showCutLine === true ? { border: '1px dashed #9ca3af' } : {}),
+        ...(showCutLine === 'bottom' ? { borderBottom: '1px dashed #000' } : {}),
         display: 'flex',
         flexDirection: qrPlacement === 'top' && showQr ? 'column' : 'row',
         alignItems: qrPlacement === 'top' && showQr ? 'center' : 'stretch',
@@ -288,7 +294,7 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                letterSpacing: '0.02em',
+                
               }}
             >
               {showBarcode ? itemBarcodeData(item) : uidText}
@@ -341,7 +347,15 @@ export default function PrintHangTags() {
   const set = (key, value) => setSettings((prev) => ({ ...prev, [key]: value }));
   const setCustom = (key, value) => setSettings((prev) => ({ ...prev, custom: { ...prev.custom, [key]: value } }));
 
-  const format = useMemo(() => resolveFormat(settings.formatId, settings.custom), [settings.formatId, settings.custom]);
+  const rollLength = settings.rollLengths?.[settings.formatId];
+  const format = useMemo(
+    () => resolveFormat(settings.formatId, settings.custom, rollLength),
+    [settings.formatId, settings.custom, rollLength]
+  );
+  const setRollLength = (value) =>
+    setSettings((prev) => ({ ...prev, rollLengths: { ...(prev.rollLengths || {}), [prev.formatId]: value } }));
+  // Receipt printers can print every tag on one long strip.
+  const stripMode = Boolean(format.receipt && settings.receiptStrip);
   const warning = layoutWarning(format);
   const perPage = labelsPerPage(format);
 
@@ -388,14 +402,22 @@ export default function PrintHangTags() {
   }, [selectedItems, copies, skip]);
 
   const pages = useMemo(() => {
+    if (stripMode) return slots.length ? [slots] : [];
     const result = [];
     for (let i = 0; i < slots.length; i += perPage) result.push(slots.slice(i, i + perPage));
     return result;
-  }, [slots, perPage]);
+  }, [slots, perPage, stripMode]);
 
   const labelCount = slots.length - skip;
-  const pageW = format.kind === 'sheet' ? format.page.w : format.label.w;
-  const pageH = format.kind === 'sheet' ? format.page.h : format.label.h;
+  const pageW = format.kind === 'sheet' ? format.page.w : format.paper?.w || format.label.w;
+  const pageH =
+    format.kind === 'sheet'
+      ? format.page.h
+      : stripMode
+        ? Math.max(1, slots.length) * format.label.h + 0.5 // a little paper at the end for tearing off
+        : format.label.h;
+  // Receipt paper is wider than the area the printer can reach; centre the tag.
+  const rollOffsetX = format.kind === 'sheet' ? 0 : (pageW - format.label.w) / 2;
   const nudgeX = clamp(Number(settings.nudgeX) || 0, -0.5, 0.5);
   const nudgeY = clamp(Number(settings.nudgeY) || 0, -0.5, 0.5);
   const showCutLines = format.kind === 'sheet' && (format.id === 'custom' ? format.cutLines : format.cutLines && settings.cutLines);
@@ -570,6 +592,39 @@ export default function PrintHangTags() {
               </div>
             )}
 
+            {format.adjustableLength && (
+              <div className="grid grid-cols-2 gap-2">
+                {numberField('roll-length', 'Length of each tag (in)', rollLength ?? format.label.h, setRollLength, 0.25)}
+                <p className="self-end pb-1 text-xs text-base-content/60">
+                  Width {format.label.w}"{format.receipt ? ` (printable area of ${format.paper.w}" paper)` : ''}
+                </p>
+              </div>
+            )}
+
+            {format.receipt && (
+              <div className="space-y-2 text-sm">
+                {[
+                  [false, 'Cut after each tag', 'One tag per page — set the printer to cut after each page.'],
+                  [true, 'One continuous strip', 'All tags on one strip with dashed lines between them, to cut by hand.'],
+                ].map(([value, title, hint]) => (
+                  <label key={title} className="flex cursor-pointer items-start gap-2">
+                    <input
+                      type="radio"
+                      name="receipt-mode"
+                      className="mt-1"
+                      checked={Boolean(settings.receiptStrip) === value}
+                      onChange={() => set('receiptStrip', value)}
+                      style={{ accentColor: 'var(--primary)' }}
+                    />
+                    <span>
+                      <span className="font-medium text-base-content">{title}</span>
+                      <span className="block text-xs text-base-content/60">{hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+            )}
+
             {warning && (
               <Alert variant="destructive">
                 <AlertDescription>{warning}</AlertDescription>
@@ -631,8 +686,22 @@ export default function PrintHangTags() {
                 <p>In the print window choose <strong>Scale: 100%</strong> (or "Actual size"), <strong>Margins: None</strong>, and turn <strong>Headers and footers off</strong>.</p>
                 {format.kind === 'sheet' ? (
                   <p>Print one test page on plain paper and hold it over a label sheet against the light. If it is off, use Nudge. "Start at label" skips labels already used on a sheet (counting across, then down).</p>
+                ) : format.receipt ? (
+                  <>
+                    <p>
+                      Pick the receipt printer in the print window. Under <strong>More settings → Paper size</strong> choose its
+                      {' '}{format.id === 'receipt-58' ? '58 mm' : '80 mm'} roll size (often called "Roll paper" or "Receipt").
+                    </p>
+                    <p>
+                      Receipt printers print in black only and need their maker's driver installed on the computer
+                      (Epson TM, Star, etc.); a printer that only works with a shop's till app cannot be used from a web page.
+                    </p>
+                  </>
                 ) : (
-                  <p>For a label printer, pick the printer and set its paper size to {format.label.w}" × {format.label.h}" in the print window.</p>
+                  <p>
+                    Pick the label printer in the print window and set its paper size to {format.label.w}" × {format.label.h}"
+                    {' '}(DYMO, Zebra, Rollo and Brother all list their label sizes there once the printer's driver is installed).
+                  </p>
                 )}
               </div>
             </div>
@@ -662,8 +731,8 @@ export default function PrintHangTags() {
                 }}
               >
                 {pageSlots.map((item, slotIndex) => {
-                  let left = nudgeX;
-                  let top = nudgeY;
+                  let left = nudgeX + rollOffsetX;
+                  let top = nudgeY + (stripMode ? slotIndex * format.label.h : 0);
                   if (format.kind === 'sheet') {
                     const col = slotIndex % format.cols;
                     const row = Math.floor(slotIndex / format.cols);
@@ -682,7 +751,7 @@ export default function PrintHangTags() {
                           settings={settings}
                           logoUrl={appSettings?.logoUrl}
                           containerName={item.container_id ? containerNames.get(item.container_id) : ''}
-                          showCutLine={showCutLines}
+                          showCutLine={showCutLines || (stripMode && slotIndex < pageSlots.length - 1 ? 'bottom' : false)}
                         />
                       )}
                     </div>

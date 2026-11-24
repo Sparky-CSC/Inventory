@@ -233,10 +233,13 @@ so reprint labels when convenient — new labels point at this site.
   *Print Hang Tag* on items) opens the label designer: pick items, a size —
   hang tags on cardstock, Avery sticker sheets (5160, 5161, 5163, 5164, 5167,
   22806, business-card 5371/8371), label printers (DYMO, Zebra, Rollo,
-  Brother) or a custom size — and what goes on each label (QR code, barcode,
+  Brother, including 62 mm continuous tape), receipt printers (80 mm and
+  58 mm thermal rolls — one tag per cut, or one continuous strip) or a custom size — and what goes on each label (QR code, barcode,
   name, UID, location, category, size and colour, condition, heading, logo).
   "Start at label" reuses part-used sheets; "Nudge" fixes printer alignment.
-  Print with Scale 100%, no margins and headers/footers off.
+  Print with Scale 100%, no margins and headers/footers off. Label and receipt
+  printers print from the browser through their own driver, so install the
+  maker's driver and pick the matching paper size in the print window.
 - **Back up.** Administration → Data & Backup → *Download backup* gives you one
   file with every record. In this-device mode this is essential: clearing the
   browser's data erases the inventory.

@@ -99,6 +99,42 @@ export const LABEL_FORMATS = [
     kind: 'roll', label: { w: 4, h: 6 },
   },
   {
+    id: 'roll-zebra-2x1',
+    group: 'Label printer (one label per page)',
+    name: '2" × 1" (Zebra, Rollo and similar)',
+    kind: 'roll', label: { w: 2, h: 1 },
+  },
+  {
+    id: 'roll-zebra-4x2',
+    group: 'Label printer (one label per page)',
+    name: '4" × 2" (Zebra, Rollo and similar)',
+    kind: 'roll', label: { w: 4, h: 2 },
+  },
+  {
+    id: 'roll-brother-62x29',
+    group: 'Label printer (one label per page)',
+    name: '62 × 29 mm (Brother QL, DK-1209)',
+    kind: 'roll', label: { w: 2.44, h: 1.14 },
+  },
+  {
+    id: 'roll-brother-62-continuous',
+    group: 'Label printer (one label per page)',
+    name: '62 mm continuous tape (Brother QL, DK-2205) — choose the length',
+    kind: 'roll', label: { w: 2.44, h: 1.5 }, adjustableLength: true,
+  },
+  {
+    id: 'receipt-80',
+    group: 'Receipt printer (thermal roll)',
+    name: '80 mm receipt paper (Epson TM, Star, most POS printers)',
+    kind: 'roll', receipt: true, paper: { w: 3.15 }, label: { w: 2.83, h: 2 }, adjustableLength: true,
+  },
+  {
+    id: 'receipt-58',
+    group: 'Receipt printer (thermal roll)',
+    name: '58 mm receipt paper (small and portable printers)',
+    kind: 'roll', receipt: true, paper: { w: 2.28 }, label: { w: 1.89, h: 1.75 }, adjustableLength: true,
+  },
+  {
     id: 'custom',
     group: 'Custom',
     name: 'Custom size…',
@@ -112,9 +148,16 @@ export const DEFAULT_CUSTOM = {
 };
 
 /** The format actually used, with a custom size turned into a full definition. */
-export function resolveFormat(formatId, custom = DEFAULT_CUSTOM) {
+export function resolveFormat(formatId, custom = DEFAULT_CUSTOM, rollLength) {
   const preset = LABEL_FORMATS.find((f) => f.id === formatId) || LABEL_FORMATS[0];
-  if (preset.kind !== 'custom') return preset;
+  if (preset.kind !== 'custom') {
+    // Continuous tape and receipt paper: the person picks how long each tag is.
+    const length = Number(rollLength);
+    if (preset.adjustableLength && Number.isFinite(length) && length >= 0.5 && length <= 12) {
+      return { ...preset, label: { ...preset.label, h: length } };
+    }
+    return preset;
+  }
   const c = { ...DEFAULT_CUSTOM, ...custom };
   const num = (v, min, fallback) => (Number.isFinite(Number(v)) && Number(v) >= min ? Number(v) : fallback);
   const label = { w: num(c.w, 0.25, 2.5), h: num(c.h, 0.25, 1.5) };
