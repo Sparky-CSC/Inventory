@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { useAppSettings } from './AppSettingsContext';
 import { useUserData } from './UserDataContext';
-import { useOffline } from './OfflineManager';
+import { useOffline, OfflineSetupButton } from './OfflineManager';
 import { User } from '@/entities/User';
 import { isAdminUser } from '@/lib/permissions';
 import { MAIN_NAV_LINKS } from '@/lib/navigation';
@@ -206,6 +206,7 @@ export default function AppShell({ children, currentPageName }) {
         {/* Online Status - Now at top of sidebar */}
         <div className="mb-3">
           <OnlineStatusIndicator />
+          {isDesktop && <OfflineSetupButton className="mt-2" />}
         </div>
         
         <div className="flex items-center justify-between">
@@ -302,7 +303,8 @@ export default function AppShell({ children, currentPageName }) {
             >
               <Menu className="w-6 h-6" />
             </Button>
-            <h2 className="text-lg font-semibold truncate">{currentPageName}</h2>
+            <h2 className="text-lg font-semibold truncate flex-1 min-w-0">{currentPageName}</h2>
+            <OfflineSetupButton compact />
           </header>
         )}
         

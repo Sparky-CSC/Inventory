@@ -20,7 +20,7 @@ export default function Layout({ children, currentPageName }) {
 
   return (
     <AppSettingsProvider>
-      <OfflineProvider showOfflineSetup={!isPrintPage}>
+      <OfflineProvider>
         <UserDataProvider>
           <DataProvider>
             <TooltipProvider delayDuration={100}>

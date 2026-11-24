@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback, createContext, useContext } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { Wifi, Download, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
+import { Download, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -274,7 +274,7 @@ class OfflineStorage {
   }
 }
 
-export const OfflineProvider = ({ children, showOfflineSetup = true }) => {
+export const OfflineProvider = ({ children }) => {
   // When the data lives in this browser (local mode) there is nothing to be
   // "offline" from, so the app always behaves as if it is connected.
   const [isOnline, setIsOnline] = useState(IS_LOCAL_MODE ? true : navigator.onLine);
@@ -574,32 +574,35 @@ export const OfflineProvider = ({ children, showOfflineSetup = true }) => {
   return (
     <OfflineContext.Provider value={contextValue}>
       {children}
-      {showOfflineSetup && !IS_LOCAL_MODE && <OfflineStatusIndicator />}
     </OfflineContext.Provider>
   );
 };
 
-const OfflineStatusIndicator = () => {
-  // Remove the old floating status indicator since it's now in the sidebar
-  // Keep only the download dialog functionality
+// Button + dialog for downloading data for offline use. Rendered inside the
+// app shell (mobile top bar / desktop sidebar) so it never covers page content.
+export const OfflineSetupButton = ({ compact = false, className = '' }) => {
   const { downloadForOffline, downloadStatus, downloadProgress } = useOffline();
+  if (IS_LOCAL_MODE) return null;
 
-  // Only show the download dialog trigger, not the floating status
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button 
-          size="sm" 
-          className="fixed top-20 right-4 z-40 shadow-lg"
-          style={{
-            backgroundColor: 'var(--primary)',
-            color: 'var(--primary-content)'
-          }}
-        >
-          <Wifi className="w-4 h-4 mr-2" />
-          <span className="hidden sm:inline">Offline Setup</span>
-          <span className="sm:hidden">Setup</span>
-        </Button>
+        {compact ? (
+          <Button
+            variant="ghost"
+            size="icon"
+            className={`flex-shrink-0 ${className}`}
+            aria-label="Offline setup"
+            title="Offline setup"
+          >
+            <Download className="w-5 h-5" />
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" className={`w-full justify-start ${className}`}>
+            <Download className="w-4 h-4 mr-2" />
+            Offline Setup
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
