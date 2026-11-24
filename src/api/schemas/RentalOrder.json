@@ -1,0 +1,111 @@
+{
+  "name": "RentalOrder",
+  "type": "object",
+  "properties": {
+    "renter_id": {
+      "type": "string",
+      "description": "ID of the Renter"
+    },
+    "renter_name": {
+      "type": "string",
+      "description": "Denormalized name of the renter for display"
+    },
+    "renter_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the renter for reminders"
+    },
+    "renter_phone": {
+      "type": "string",
+      "description": "Phone number of the renter for contact"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "quote",
+        "confirmed",
+        "rented_out",
+        "partially_returned",
+        "completed",
+        "cancelled"
+      ],
+      "default": "quote",
+      "description": "The current status of the order"
+    },
+    "quote_number": {
+      "type": "string",
+      "description": "System-generated quote number"
+    },
+    "order_number": {
+      "type": "string",
+      "description": "System-generated order number (when confirmed)"
+    },
+    "rental_start_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "rental_end_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "inventory_item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "daily_rate": {
+            "type": "number"
+          },
+          "total_days": {
+            "type": "number"
+          },
+          "line_total": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "damage_waiver_fee": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_rate": {
+      "type": "number",
+      "default": 0
+    },
+    "tax_amount": {
+      "type": "number"
+    },
+    "total_amount": {
+      "type": "number"
+    },
+    "security_deposit": {
+      "type": "number",
+      "default": 0
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "renter_id",
+    "status",
+    "rental_start_date",
+    "rental_end_date"
+  ]
+}

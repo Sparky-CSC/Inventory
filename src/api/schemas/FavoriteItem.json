@@ -1,0 +1,31 @@
+{
+  "name": "FavoriteItem",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user who favorited this item"
+    },
+    "inventory_item_id": {
+      "type": "string",
+      "description": "ID of the inventory item that was favorited"
+    },
+    "item_name": {
+      "type": "string",
+      "description": "Name of the item (for quick display)"
+    },
+    "item_category": {
+      "type": "string",
+      "description": "Category of the item (for quick display)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Personal notes about why this item was favorited"
+    }
+  },
+  "required": [
+    "user_id",
+    "inventory_item_id",
+    "item_name"
+  ]
+}

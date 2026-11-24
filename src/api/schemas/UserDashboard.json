@@ -1,0 +1,171 @@
+{
+  "name": "UserDashboard",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this dashboard belongs to"
+    },
+    "layout": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "stats",
+              "recent_activity",
+              "category_breakdown",
+              "quick_actions",
+              "my_items",
+              "borrowed_items",
+              "favorites",
+              "notifications",
+              "callboard",
+              "calendar",
+              "voice_channels",
+              "messages"
+            ]
+          },
+          "production_id": {
+            "type": "string",
+            "description": "ID of the production this widget is linked to. Null for global widgets."
+          },
+          "position": {
+            "type": "object",
+            "properties": {
+              "x": {
+                "type": "number"
+              },
+              "y": {
+                "type": "number"
+              },
+              "w": {
+                "type": "number"
+              },
+              "h": {
+                "type": "number"
+              }
+            }
+          },
+          "visible": {
+            "type": "boolean",
+            "default": true
+          },
+          "settings": {
+            "type": "object",
+            "description": "Widget-specific settings"
+          }
+        }
+      },
+      "description": "Dashboard layout configuration with widget positions"
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "welcome_message": {
+          "type": "string"
+        },
+        "show_tips": {
+          "type": "boolean",
+          "default": true
+        },
+        "default_view": {
+          "type": "string",
+          "enum": [
+            "grid",
+            "list"
+          ],
+          "default": "grid"
+        },
+        "items_per_page": {
+          "type": "number",
+          "default": 12
+        },
+        "favorite_categories": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quick_filters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "filters": {
+                "type": "object"
+              }
+            }
+          }
+        },
+        "personal_default_layout": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "stats",
+                  "recent_activity",
+                  "category_breakdown",
+                  "quick_actions",
+                  "my_items",
+                  "borrowed_items",
+                  "favorites",
+                  "notifications",
+                  "callboard",
+                  "calendar",
+                  "voice_channels",
+                  "messages"
+                ]
+              },
+              "production_id": {
+                "type": "string"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "x": {
+                    "type": "number"
+                  },
+                  "y": {
+                    "type": "number"
+                  },
+                  "w": {
+                    "type": "number"
+                  },
+                  "h": {
+                    "type": "number"
+                  }
+                }
+              },
+              "visible": {
+                "type": "boolean"
+              },
+              "settings": {
+                "type": "object"
+              }
+            }
+          },
+          "description": "A user-saved default layout configuration."
+        }
+      },
+      "description": "User preferences for dashboard behavior"
+    }
+  },
+  "required": [
+    "user_id"
+  ]
+}

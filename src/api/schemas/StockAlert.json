@@ -1,0 +1,52 @@
+{
+  "name": "StockAlert",
+  "type": "object",
+  "properties": {
+    "expendable_item_id": {
+      "type": "string",
+      "description": "ID of the expendable item"
+    },
+    "alert_type": {
+      "type": "string",
+      "enum": [
+        "low_stock",
+        "out_of_stock",
+        "reorder_reminder"
+      ],
+      "description": "Type of alert"
+    },
+    "message": {
+      "type": "string",
+      "description": "Alert message"
+    },
+    "created_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When alert was created"
+    },
+    "acknowledged_by": {
+      "type": "string",
+      "description": "User who acknowledged the alert"
+    },
+    "acknowledged_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When alert was acknowledged"
+    },
+    "is_resolved": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the alert has been resolved"
+    },
+    "resolved_date": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When alert was resolved"
+    }
+  },
+  "required": [
+    "expendable_item_id",
+    "alert_type",
+    "message"
+  ]
+}

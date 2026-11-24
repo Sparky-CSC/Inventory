@@ -1,0 +1,79 @@
+{
+  "name": "UserNotification",
+  "type": "object",
+  "properties": {
+    "user_id": {
+      "type": "string",
+      "description": "ID of the user this notification is for"
+    },
+    "title": {
+      "type": "string",
+      "description": "Notification title"
+    },
+    "message": {
+      "type": "string",
+      "description": "Notification message content"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "info",
+        "warning",
+        "success",
+        "error",
+        "reminder"
+      ],
+      "default": "info",
+      "description": "Type of notification for styling"
+    },
+    "related_entity_type": {
+      "type": "string",
+      "enum": [
+        "inventory_item",
+        "production",
+        "pull_list",
+        "borrowed_item",
+        "rental"
+      ],
+      "description": "Type of entity this notification relates to"
+    },
+    "related_entity_id": {
+      "type": "string",
+      "description": "ID of the related entity"
+    },
+    "action_url": {
+      "type": "string",
+      "description": "URL to navigate to when notification is clicked"
+    },
+    "is_read": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the user has read this notification"
+    },
+    "read_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the notification was read"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this notification should be automatically removed"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high"
+      ],
+      "default": "medium",
+      "description": "Priority level of the notification"
+    }
+  },
+  "required": [
+    "user_id",
+    "title",
+    "message"
+  ]
+}

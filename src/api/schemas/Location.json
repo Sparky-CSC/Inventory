@@ -1,0 +1,65 @@
+{
+  "name": "Location",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Location name or identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the location"
+    },
+    "location_type": {
+      "type": "string",
+      "enum": [
+        "building",
+        "room",
+        "rack"
+      ],
+      "default": "room",
+      "description": "Type of location in the hierarchy"
+    },
+    "parent_location_id": {
+      "type": "string",
+      "description": "ID of the parent location (for hierarchical structure)"
+    },
+    "building": {
+      "type": "string",
+      "description": "Building name (for legacy compatibility)"
+    },
+    "room": {
+      "type": "string",
+      "description": "Room number or name (for legacy compatibility)"
+    },
+    "section": {
+      "type": "string",
+      "description": "Section within location (for legacy compatibility)"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Maximum number of items this location can hold"
+    },
+    "current_count": {
+      "type": "number",
+      "default": 0,
+      "description": "Current number of items in this location"
+    },
+    "qr_code": {
+      "type": "string",
+      "description": "Generated QR code data"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "description": "URL to QR code image"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the location"
+    }
+  },
+  "required": [
+    "name",
+    "location_type"
+  ]
+}

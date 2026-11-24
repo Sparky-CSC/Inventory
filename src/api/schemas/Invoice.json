@@ -1,0 +1,110 @@
+{
+  "name": "Invoice",
+  "type": "object",
+  "properties": {
+    "rental_order_id": {
+      "type": "string"
+    },
+    "renter_id": {
+      "type": "string"
+    },
+    "invoice_number": {
+      "type": "string"
+    },
+    "issue_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "sent",
+        "paid",
+        "partially_paid",
+        "overdue",
+        "void"
+      ],
+      "default": "draft"
+    },
+    "line_items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "inventory_item_id": {
+            "type": "string"
+          },
+          "item_name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number"
+          },
+          "daily_rate": {
+            "type": "number"
+          },
+          "total_days": {
+            "type": "number"
+          },
+          "line_total": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "subtotal": {
+      "type": "number"
+    },
+    "damage_waiver_fee": {
+      "type": "number"
+    },
+    "tax_amount": {
+      "type": "number"
+    },
+    "total_amount": {
+      "type": "number"
+    },
+    "amount_paid": {
+      "type": "number",
+      "default": 0
+    },
+    "balance_due": {
+      "type": "number"
+    },
+    "payment_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "payment_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "amount": {
+            "type": "number"
+          },
+          "payment_method": {
+            "type": "string"
+          },
+          "notes": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "rental_order_id",
+    "renter_id",
+    "invoice_number",
+    "total_amount"
+  ]
+}

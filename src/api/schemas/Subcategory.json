@@ -1,0 +1,32 @@
+{
+  "name": "Subcategory",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Subcategory name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the subcategory"
+    },
+    "category_name": {
+      "type": "string",
+      "description": "Parent category name this subcategory belongs to"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this subcategory is active and available for use"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Order for displaying subcategories within parent category",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "category_name"
+  ]
+}

@@ -1,0 +1,96 @@
+{
+  "name": "ExpendableItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the expendable item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the item"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "makeup",
+        "fabric",
+        "adhesives",
+        "paint",
+        "batteries",
+        "consumables",
+        "office_supplies",
+        "cleaning",
+        "hardware",
+        "other"
+      ],
+      "description": "Category of expendable item"
+    },
+    "current_quantity": {
+      "type": "number",
+      "default": 0,
+      "description": "Current quantity in stock"
+    },
+    "unit_of_measure": {
+      "type": "string",
+      "enum": [
+        "pieces",
+        "yards",
+        "feet",
+        "ounces",
+        "pounds",
+        "gallons",
+        "liters",
+        "tubes",
+        "bottles",
+        "boxes",
+        "rolls"
+      ],
+      "description": "Unit of measurement"
+    },
+    "low_stock_threshold": {
+      "type": "number",
+      "description": "Quantity at which to trigger low stock alert"
+    },
+    "supplier": {
+      "type": "string",
+      "description": "Preferred supplier"
+    },
+    "supplier_contact": {
+      "type": "string",
+      "description": "Supplier contact information"
+    },
+    "cost_per_unit": {
+      "type": "number",
+      "description": "Cost per unit"
+    },
+    "last_ordered_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date last ordered"
+    },
+    "last_ordered_quantity": {
+      "type": "number",
+      "description": "Quantity last ordered"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "location": {
+      "type": "string",
+      "description": "Storage location"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this item is actively tracked"
+    }
+  },
+  "required": [
+    "name",
+    "current_quantity",
+    "unit_of_measure",
+    "low_stock_threshold"
+  ]
+}

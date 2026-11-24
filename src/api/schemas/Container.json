@@ -1,0 +1,52 @@
+{
+  "name": "Container",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Container name or identifier"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the container"
+    },
+    "qr_code": {
+      "type": "string",
+      "description": "Generated QR code data"
+    },
+    "qr_code_url": {
+      "type": "string",
+      "description": "URL to QR code image"
+    },
+    "location": {
+      "type": "string",
+      "description": "Physical location of container"
+    },
+    "container_type": {
+      "type": "string",
+      "enum": [
+        "box",
+        "rack",
+        "garment_bag",
+        "drawer",
+        "shelf",
+        "cabinet"
+      ],
+      "default": "box"
+    },
+    "capacity": {
+      "type": "number",
+      "description": "Maximum number of items"
+    },
+    "photo_url": {
+      "type": "string",
+      "description": "Photo of the container"
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

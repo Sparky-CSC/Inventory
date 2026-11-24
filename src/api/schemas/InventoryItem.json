@@ -1,0 +1,311 @@
+{
+  "name": "InventoryItem",
+  "type": "object",
+  "properties": {
+    "rental_rate": {
+      "type": "number",
+      "description": "Daily rental rate for this item."
+    },
+    "name": {
+      "type": "string",
+      "description": "Name of the inventory item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Detailed description"
+    },
+    "quantity": {
+      "type": "number",
+      "description": "Total quantity in stock. If variants are used, this is the sum of variant quantities.",
+      "default": 1
+    },
+    "categories": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "costume",
+          "prop",
+          "scenery",
+          "equipment",
+          "fabric",
+          "accessory",
+          "lighting",
+          "sound",
+          "furniture"
+        ]
+      },
+      "description": "Multiple categories this item belongs to"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "costume",
+        "prop",
+        "scenery",
+        "equipment",
+        "fabric",
+        "accessory",
+        "lighting",
+        "sound",
+        "furniture"
+      ],
+      "description": "Primary category (legacy field)"
+    },
+    "subcategory": {
+      "type": "string",
+      "description": "More specific category (e.g., 'Victorian dress', 'sword', 'backdrop')"
+    },
+    "condition": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "needs_repair"
+      ],
+      "default": "good"
+    },
+    "size": {
+      "type": "string",
+      "description": "Standard size information (e.g., XS, S, M, L, XL)"
+    },
+    "measurements": {
+      "type": "object",
+      "properties": {
+        "chest": {
+          "type": "string"
+        },
+        "waist": {
+          "type": "string"
+        },
+        "hips": {
+          "type": "string"
+        },
+        "inseam": {
+          "type": "string"
+        },
+        "sleeve": {
+          "type": "string"
+        },
+        "neck": {
+          "type": "string"
+        },
+        "shoulder": {
+          "type": "string"
+        }
+      },
+      "description": "Specific measurements for costumes"
+    },
+    "dimensions": {
+      "type": "string",
+      "description": "Physical dimensions (length x width x height, diameter, etc.)"
+    },
+    "color": {
+      "type": "string",
+      "description": "Primary color(s)"
+    },
+    "material": {
+      "type": "string",
+      "description": "Materials used (fabric, wood, metal, etc.)"
+    },
+    "time_period": {
+      "type": "string",
+      "description": "Historical time period (e.g., 'Medieval', '1920s', 'Victorian', 'Renaissance')"
+    },
+    "style": {
+      "type": "string",
+      "description": "Artistic or design style (e.g., 'Gothic', 'Art Deco', 'Minimalist', 'Baroque')"
+    },
+    "model_number": {
+      "type": "string",
+      "description": "Model number, barcode, or UPC"
+    },
+    "serial_number": {
+      "type": "string",
+      "description": "Serial number, if applicable"
+    },
+    "uid": {
+      "type": "string",
+      "description": "Unique, system-generated identifier for the item. Cannot be edited by users."
+    },
+    "qr_code": {
+      "type": "string",
+      "description": "Generated QR code for this item"
+    },
+    "parts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              "needs_repair"
+            ]
+          }
+        }
+      },
+      "description": "List of individual parts for composite items"
+    },
+    "era_period": {
+      "type": "string",
+      "description": "Historical period or style era (legacy field)"
+    },
+    "location": {
+      "type": "string",
+      "description": "Storage location"
+    },
+    "container_id": {
+      "type": "string",
+      "description": "ID of container this item belongs to"
+    },
+    "value": {
+      "type": "number",
+      "description": "Estimated value in dollars"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Array of photo objects with metadata"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "available",
+        "in_use",
+        "rented",
+        "maintenance",
+        "retired"
+      ],
+      "default": "available"
+    },
+    "acquisition_date": {
+      "type": "string",
+      "format": "date"
+    },
+    "last_cleaned": {
+      "type": "string",
+      "format": "date"
+    },
+    "variants": {
+      "type": "array",
+      "description": "For items with variations like different sizes. If this is used, top-level fields like size, condition, and quantity may be overridden.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sku": {
+            "type": "string",
+            "description": "Unique identifier for this variant (e.g., a barcode value)"
+          },
+          "size": {
+            "type": "string",
+            "description": "Size of this variant (e.g., M, L, 10)"
+          },
+          "description": {
+            "type": "string",
+            "description": "Description specific to this variant."
+          },
+          "measurements": {
+            "type": "object",
+            "properties": {
+              "chest": {
+                "type": "string"
+              },
+              "waist": {
+                "type": "string"
+              },
+              "hips": {
+                "type": "string"
+              },
+              "inseam": {
+                "type": "string"
+              },
+              "sleeve": {
+                "type": "string"
+              },
+              "neck": {
+                "type": "string"
+              },
+              "shoulder": {
+                "type": "string"
+              }
+            },
+            "description": "Specific measurements for this variant"
+          },
+          "condition": {
+            "type": "string",
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              "needs_repair"
+            ],
+            "default": "good"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "available",
+              "in_use",
+              "rented",
+              "maintenance",
+              "retired"
+            ],
+            "default": "available"
+          },
+          "quantity": {
+            "type": "number",
+            "default": 1
+          },
+          "location": {
+            "type": "string"
+          },
+          "container_id": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "size",
+          "quantity"
+        ]
+      }
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

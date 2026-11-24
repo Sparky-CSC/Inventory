@@ -1,0 +1,52 @@
+{
+  "name": "User",
+  "type": "object",
+  "properties": {
+    "phone": {
+      "type": "string",
+      "description": "User's contact phone number"
+    },
+    "role_id": {
+      "type": "string",
+      "description": "ID of the assigned UserRole"
+    },
+    "account_status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "expired",
+        "disabled"
+      ],
+      "default": "active",
+      "description": "Status of the user's account"
+    },
+    "role_assigned_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "The date and time the current role was assigned"
+    },
+    "sidebar_order": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "User's custom order for sidebar navigation items."
+    },
+    "default_page": {
+      "type": "string",
+      "description": "The user's default page to land on after login.",
+      "enum": [
+        "Dashboard",
+        "Inventory",
+        "InventoryList",
+        "Search",
+        "RentalsDashboard",
+        "BorrowedItems",
+        "Administration"
+      ]
+    }
+  },
+  "required": [
+    "role_id"
+  ]
+}

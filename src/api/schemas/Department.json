@@ -1,0 +1,41 @@
+{
+  "name": "Department",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the department"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of the department's responsibilities"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this department is active and available for selection"
+    },
+    "is_system_default": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a built-in system department that cannot be deleted"
+    },
+    "sort_order": {
+      "type": "number",
+      "description": "Order for displaying departments in dropdowns",
+      "default": 0
+    },
+    "color": {
+      "type": "string",
+      "description": "Color code for this department (hex code)",
+      "default": "#6B7280"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "User who created this department"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "name": "UserRole",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Role name (Admin, Manager, User, Viewer)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of what this role can do"
+    },
+    "permissions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "manage_users",
+          "manage_settings",
+          "create_items",
+          "edit_items",
+          "delete_items",
+          "view_items",
+          "manage_categories",
+          "manage_locations",
+          "manage_containers",
+          "manage_borrowed_items",
+          "print_labels",
+          "manage_expendables",
+          "manage_rentals",
+          "delete_rentals"
+        ]
+      },
+      "description": "System-wide permissions this role has"
+    },
+    "is_system_role": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether this is a built-in system role that cannot be deleted"
+    },
+    "is_active": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this role is active and can be assigned"
+    },
+    "duration_days": {
+      "type": "number",
+      "description": "Number of days access is granted for this role. 0 or empty means unlimited.",
+      "default": 0
+    }
+  },
+  "required": [
+    "name",
+    "permissions"
+  ]
+}

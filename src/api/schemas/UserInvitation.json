@@ -1,0 +1,56 @@
+{
+  "name": "UserInvitation",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the invited user"
+    },
+    "role_id": {
+      "type": "string",
+      "description": "ID of the role to assign to this user"
+    },
+    "role_name": {
+      "type": "string",
+      "description": "Name of the role (for display purposes)"
+    },
+    "invited_by": {
+      "type": "string",
+      "description": "Email of the user who sent the invitation"
+    },
+    "invitation_token": {
+      "type": "string",
+      "description": "Unique token for the invitation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted",
+        "expired"
+      ],
+      "default": "pending",
+      "description": "Status of the invitation"
+    },
+    "expires_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When this invitation expires"
+    },
+    "accepted_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the invitation was accepted"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about this invitation"
+    }
+  },
+  "required": [
+    "email",
+    "role_id",
+    "invited_by"
+  ]
+}

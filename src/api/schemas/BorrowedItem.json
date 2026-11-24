@@ -1,0 +1,154 @@
+{
+  "name": "BorrowedItem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Name of the borrowed item"
+    },
+    "description": {
+      "type": "string",
+      "description": "Brief description of the item"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "costume",
+        "prop",
+        "scenery",
+        "equipment",
+        "fabric",
+        "accessory",
+        "lighting",
+        "sound",
+        "furniture"
+      ],
+      "description": "Category of the borrowed item"
+    },
+    "lender_name": {
+      "type": "string",
+      "description": "Name of the person/organization we borrowed from"
+    },
+    "lender_email": {
+      "type": "string",
+      "format": "email",
+      "description": "Email address of the lender for reminders"
+    },
+    "lender_phone": {
+      "type": "string",
+      "description": "Phone number of the lender for contact"
+    },
+    "lender_contact": {
+      "type": "string",
+      "description": "Contact information (address, etc.)"
+    },
+    "borrowed_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when we acquired the item"
+    },
+    "received_by": {
+      "type": "string",
+      "description": "Name of the person who received the item"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date when the item should be returned"
+    },
+    "returned_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Actual date when the item was returned"
+    },
+    "returned_by": {
+      "type": "string",
+      "description": "Name of the person who handled the return"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "borrowed",
+        "overdue",
+        "returned"
+      ],
+      "default": "borrowed",
+      "description": "Current status of the borrowed item"
+    },
+    "condition_borrowed": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "needs_repair"
+      ],
+      "description": "Condition when we received the item"
+    },
+    "condition_returned": {
+      "type": "string",
+      "enum": [
+        "excellent",
+        "good",
+        "fair",
+        "poor",
+        "needs_repair"
+      ],
+      "description": "Condition when we returned the item"
+    },
+    "rental_fee": {
+      "type": "number",
+      "description": "Rental fee paid (if any)"
+    },
+    "deposit_amount": {
+      "type": "number",
+      "description": "Security deposit paid"
+    },
+    "deposit_returned": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the deposit has been returned"
+    },
+    "photos": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "caption": {
+            "type": "string"
+          },
+          "is_primary": {
+            "type": "boolean"
+          },
+          "upload_date": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "description": "Photos of the borrowed item"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Additional notes about the borrowing agreement"
+    },
+    "show_production": {
+      "type": "string",
+      "description": "Show or production this item was borrowed for"
+    },
+    "reminder_sent": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether a return reminder has been sent"
+    }
+  },
+  "required": [
+    "name",
+    "lender_name",
+    "borrowed_date"
+  ]
+}
