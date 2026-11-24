@@ -613,26 +613,12 @@ function RoleManagement() {
   const [duplicates, setDuplicates] = useState([]);
   const [showDuplicatesDialog, setShowDuplicatesDialog] = useState(false);
   const [isProcessingDuplicates, setIsProcessingDuplicates] = useState(false);
-  const [showRemovalDialog, setShowRemovalDialog] = useState(false);
-  const [rolesToRemove, setRolesToRemove] = useState([]);
   const [currentRole, setCurrentRole] = useState(null); // Added state
   const [selectedPermissions, setSelectedPermissions] = useState({}); // Added state
   
   const { register, handleSubmit, control, reset, setValue, formState: { errors } } = useForm();
 
   const permissionsList = ALL_PERMISSIONS;
-
-  // Roles to be removed from system management
-  const rolesToRemoveFromSystem = [
-    'stage manager',
-    'costume designer', 
-    'props master',
-    'lighting designer',
-    'scenic carpenter',
-    'makeup artist',
-    'department head',
-    'student/intern'
-  ];
 
   const findDuplicateRoles = (rolesData) => {
     const roleGroups = {};
@@ -648,14 +634,6 @@ function RoleManagement() {
     
     // Return groups with more than one role
     return Object.values(roleGroups).filter(group => group.length > 1);
-  };
-
-  const findRolesToRemove = (rolesData) => {
-    return rolesData.filter(role => 
-      rolesToRemoveFromSystem.some(removeName => 
-        role.name.toLowerCase().trim() === removeName.toLowerCase()
-      )
-    );
   };
 
   const loadRoles = useCallback(async () => {
@@ -679,18 +657,10 @@ function RoleManagement() {
 
       setRoles(rolesData);
       
-      // Check for specific roles to remove
-      const foundRolesToRemove = findRolesToRemove(rolesData);
-      if (foundRolesToRemove.length > 0) {
-        setRolesToRemove(foundRolesToRemove);
-        setShowRemovalDialog(true);
-      } else {
-        // Check for duplicates only if no roles need removal
-        const duplicateGroups = findDuplicateRoles(rolesData);
-        if (duplicateGroups.length > 0) {
-          setDuplicates(duplicateGroups);
-          setShowDuplicatesDialog(true);
-        }
+      const duplicateGroups = findDuplicateRoles(rolesData);
+      if (duplicateGroups.length > 0) {
+        setDuplicates(duplicateGroups);
+        setShowDuplicatesDialog(true);
       }
     } catch (error) {
       console.error("Error loading roles:", error);
@@ -698,59 +668,6 @@ function RoleManagement() {
       setIsLoading(false);
     }
   }, []);
-
-  const handleRemoveSpecificRoles = async () => {
-    try {
-      // Get all users to check for role assignments
-      const allUsers = await User.list();
-      
-      for (const roleToRemove of rolesToRemove) {
-        // Find users assigned to this role
-        const usersWithThisRole = allUsers.filter(user => user.role_id === roleToRemove.id);
-        
-        // If there are users with this role, we need to reassign them
-        if (usersWithThisRole.length > 0) {
-          // Find a suitable replacement role (first non-system role or create a basic user role)
-          const remainingRoles = roles.filter(r => 
-            !rolesToRemoveFromSystem.some(removeName => 
-              r.name.toLowerCase().trim() === removeName.toLowerCase()
-            )
-          );
-          
-          let targetRole = remainingRoles.find(r => r.name.toLowerCase().includes('user'));
-          
-          // If no user role exists, create one
-          if (!targetRole) {
-            targetRole = await UserRole.create({
-              name: 'User',
-              description: 'Basic user role with standard permissions',
-              permissions: ['view_items', 'create_items', 'edit_items'],
-              is_system_role: true // Consider if this should be system or not
-            });
-            // Reload roles to include the newly created role
-            await loadRoles();
-          }
-          
-          // Reassign users to the target role
-          for (const user of usersWithThisRole) {
-            await User.update(user.id, { 
-              role_id: targetRole.id,
-              role_assigned_at: new Date().toISOString()
-            });
-          }
-        }
-        
-        // Delete the role
-        await UserRole.delete(roleToRemove.id);
-      }
-      
-      setShowRemovalDialog(false);
-      setRolesToRemove([]);
-      loadRoles();
-    } catch (error) {
-      console.error("Error removing specific roles:", error);
-    }
-  };
 
   const handleMergeDuplicates = async () => {
     setIsProcessingDuplicates(true);
@@ -881,12 +798,6 @@ function RoleManagement() {
               {duplicates.length} Duplicate{duplicates.length > 1 ? 's' : ''}
             </Button>
           )}
-          {rolesToRemove.length > 0 && (
-            <Button variant="outline" onClick={() => setShowRemovalDialog(true)}>
-              <AlertTriangle className="w-4 h-4 mr-2 text-error" />
-              {rolesToRemove.length} System Role{rolesToRemove.length > 1 ? 's' : ''} to Remove
-            </Button>
-          )}
           <Button onClick={handleNewRole}>
             <PlusCircle className="w-4 h-4 mr-2"/>New Role
           </Button>
@@ -1008,49 +919,6 @@ function RoleManagement() {
             <Button onClick={handleMergeDuplicates} disabled={isProcessingDuplicates} className="bg-primary hover:bg-primary-focus text-primary-content">
               <Merge className="w-4 h-4 mr-2" />
               {isProcessingDuplicates ? 'Merging...' : 'Merge Duplicates'}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Role Removal Dialog */}
-      <Dialog open={showRemovalDialog} onOpenChange={setShowRemovalDialog}>
-        <DialogContent className="max-w-xl max-h-[80vh] flex flex-col">
-          <DialogHeader>
-            <DialogTitle>System Roles Cleanup</DialogTitle>
-          </DialogHeader>
-          <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-            <Alert>
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                Found {rolesToRemove.length} system role{rolesToRemove.length > 1 ? 's' : ''} that should be removed from system management. These roles are better managed at the production level.
-              </AlertDescription>
-            </Alert>
-            
-            <div className="space-y-2">
-              <h4 className="font-semibold">Roles to be removed:</h4>
-              {rolesToRemove.map(role => (
-                <div key={role.id} className="flex justify-between items-center bg-base-200 p-2 rounded">
-                  <span className="font-medium">{role.name}</span>
-                  <Badge variant="outline" className="text-xs">{role.permissions?.length || 0} permissions</Badge>
-                </div>
-              ))}
-            </div>
-            
-            <Alert>
-              <AlertDescription>
-                Users assigned to these roles will be automatically reassigned to a basic "User" role.
-              </AlertDescription>
-            </Alert>
-          </div>
-          
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button variant="outline" onClick={() => setShowRemovalDialog(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleRemoveSpecificRoles} className="bg-error hover:bg-error-focus text-error-content">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Remove System Roles
             </Button>
           </div>
         </DialogContent>
