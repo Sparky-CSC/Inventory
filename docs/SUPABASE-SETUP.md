@@ -1,5 +1,10 @@
 # Setting up the shared database (Supabase)
 
+> **Already done for this repository (24 Nov 2026):** the Supabase project
+> `theatre-inventory` exists, Steps 1–2 have been run, and the address and
+> public key are saved in `.env.production` (so Steps 4–5 are not needed).
+> What is left: **Step 3** and **Step 7**.
+
 Do this once to switch the app from "this device only" to **shared mode**, where
 everyone signs in and sees the same inventory. Allow about 15–20 minutes.
 

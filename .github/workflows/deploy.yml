@@ -38,13 +38,8 @@ jobs:
         run: npm ci
 
       - name: Build the site
+        # The shared database's address and public key are in .env.production.
         run: npm run build
-        env:
-          # Leave these two repository variables unset to publish the
-          # "this device only" version. Set them to switch on the shared
-          # database (see README.md → "Shared mode").
-          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          VITE_SUPABASE_KEY: ${{ vars.VITE_SUPABASE_KEY }}
 
       - name: Upload the built site
         uses: actions/upload-pages-artifact@v3

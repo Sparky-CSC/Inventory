@@ -14,17 +14,20 @@ on:
     - cron: '17 9 * * 1,4' # Mondays and Thursdays, 09:17 UTC
   workflow_dispatch:
 
-permissions: {}
+permissions:
+  contents: read
 
 jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
+      - name: Check out the code
+        uses: actions/checkout@v4
+
       - name: Send a small request to the database
-        env:
-          SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
-          SUPABASE_KEY: ${{ vars.VITE_SUPABASE_KEY }}
         run: |
+          SUPABASE_URL=$(grep '^VITE_SUPABASE_URL=' .env.production | cut -d= -f2-)
+          SUPABASE_KEY=$(grep '^VITE_SUPABASE_KEY=' .env.production | cut -d= -f2-)
           if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_KEY" ]; then
             echo "The shared database is not switched on; nothing to do."
             exit 0
