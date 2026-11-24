@@ -229,6 +229,13 @@ so reprint labels when convenient — new labels point at this site.
 
 ## 6. Everyday notes
 
+- **Cloud backups to Google Drive.** *Administration → Data & Backup → Cloud
+  backups* saves a full backup (plus new photos) into every Google Drive you
+  connect, every night, and keeps the last 30 (you choose). Connect at least two
+  different Google accounts. One-time Google setup:
+  [docs/CLOUD-BACKUP-SETUP.md](docs/CLOUD-BACKUP-SETUP.md). Needs shared mode;
+  the database part is `supabase/backup.sql` and the service is
+  `supabase/functions/drive-backup`.
 - **Checking in borrowed items.** *Borrowed Items → Check in item* walks
   through six steps before anything goes into storage: the lender and loan
   terms (return date, replacement value, loan agreement on file), the item and

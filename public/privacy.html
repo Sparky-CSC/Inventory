@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy — Culver-Stockton College Theatre Inventory</title>
+<style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; line-height: 1.6; color: #1f2937; max-width: 720px; margin: 0 auto; padding: 2rem 1.25rem; }
+  h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+  h2 { font-size: 1.15rem; margin-top: 2rem; }
+  .muted { color: #6b7280; font-size: .9rem; }
+  a { color: #0b63ce; }
+</style>
+</head>
+<body>
+<h1>Privacy</h1>
+<p class="muted">Culver-Stockton College Theatre Inventory · last updated November 24, 2026</p>
+
+<p>The Theatre Inventory app is used by the Culver-Stockton College Theatre Department to keep track of its costumes,
+props, scenery and equipment, items it borrows, and items it rents out. It is used only by department staff and
+students who have been invited by an administrator.</p>
+
+<h2>What the app stores</h2>
+<ul>
+  <li>Inventory records: item names, descriptions, photos, locations, condition and history.</li>
+  <li>Records of borrowed items and rentals, including the name and contact details of lenders and renters.</li>
+  <li>For each person who signs in: name, email address and role.</li>
+</ul>
+<p>This information is kept in the department's own database (hosted by Supabase) and is visible only to signed-in
+members of the department. It is not sold, shared with advertisers, or used for any purpose other than running the
+department's inventory.</p>
+
+<h2>Google Drive backups</h2>
+<p>An administrator can connect one or more Google accounts so the app saves nightly backup copies of the inventory into
+Google Drive. When you connect an account, the app asks Google for:</p>
+<ul>
+  <li><strong>Your email address</strong>, to show which account a backup goes to.</li>
+  <li><strong>Access to files the app creates</strong> (Google's <code>drive.file</code> permission). The app creates a
+    “Theatre Inventory Backups” folder and writes backup files and photo copies into it. It cannot see, open or change any
+    other file in your Google Drive.</li>
+</ul>
+<p>The app uses this access only to create backup files, list the backups it made, and move its own old backups to the
+trash. Google's access token is stored in the department's database where it cannot be read by app users. You can remove
+the app's access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>,
+or an administrator can remove the backup location in the app. Backup files already in your Drive stay there until you
+delete them.</p>
+<p>The app's use of information received from Google APIs adheres to the
+<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>,
+including the Limited Use requirements.</p>
+
+<h2>Questions</h2>
+<p>Contact the Culver-Stockton College Theatre Department, Canton, Missouri.</p>
+<p><a href="./">Open the Theatre Inventory app</a></p>
+</body>
+</html>

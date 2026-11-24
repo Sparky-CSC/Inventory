@@ -41,6 +41,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BackButton from '../components/shared/BackButton';
 import DataTools from '../components/admin/DataTools';
+import CloudBackups from '../components/admin/CloudBackups';
 import { useUserData } from '../components/shared/UserDataContext';
 import { isAdminUser } from '@/lib/permissions';
 import { getAppUrl } from '@/utils';
@@ -51,7 +52,10 @@ import { Mail, Link as LinkIcon, ShieldAlert } from 'lucide-react';
 export default function Administration() {
   const { appSettings } = useAppSettings();
   const { currentUser } = useUserData();
-  const [activeTab, setActiveTab] = useState("users"); // State for active tab
+  // Coming back from connecting a Google Drive opens the backup tab.
+  const [activeTab, setActiveTab] = useState(() =>
+    new URLSearchParams(window.location.hash.split('?')[1] || '').get('backup') ? 'system' : 'users'
+  );
 
   // Only administrators may manage users, roles and data.
   if (!isAdminUser(currentUser)) {
@@ -104,7 +108,8 @@ export default function Administration() {
             <RoleManagement />
           </TabsContent>
 
-          <TabsContent value="system">
+          <TabsContent value="system" className="space-y-8">
+            <CloudBackups />
             <DataTools />
           </TabsContent>
         </Tabs>
