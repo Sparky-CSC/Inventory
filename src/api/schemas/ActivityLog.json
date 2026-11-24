@@ -1,0 +1,65 @@
+{
+  "name": "ActivityLog",
+  "type": "object",
+  "description": "Permanent record of what happened to an item: who did what, when. Entries are never edited.",
+  "properties": {
+    "entity_type": {
+      "type": "string",
+      "description": "Kind of record: InventoryItem, BorrowedItem, RentalOrder, Location \u2026"
+    },
+    "record_id": {
+      "type": "string",
+      "description": "Id of the record the entry is about"
+    },
+    "record_name": {
+      "type": "string",
+      "description": "Name of the record at the time"
+    },
+    "record_code": {
+      "type": "string",
+      "description": "UID or tag number at the time"
+    },
+    "action": {
+      "type": "string",
+      "description": "created, updated, deleted, checked_in, returned, moved, status_changed, condition_changed, rented_out, rental_returned, audited, audit_completed, tag_printed \u2026"
+    },
+    "summary": {
+      "type": "string",
+      "description": "One-line description of what happened"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "from": {},
+          "to": {}
+        }
+      }
+    },
+    "notes": {
+      "type": "string"
+    },
+    "related_id": {
+      "type": "string",
+      "description": "Related record, e.g. the rental order or audit"
+    },
+    "user_name": {
+      "type": "string"
+    },
+    "user_email": {
+      "type": "string"
+    },
+    "at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "required": [
+    "entity_type",
+    "action"
+  ]
+}

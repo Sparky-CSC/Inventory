@@ -73,6 +73,39 @@
           },
           "notes": {
             "type": "string"
+          },
+          "returned": {
+            "type": "boolean"
+          },
+          "returned_date": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "returned_by": {
+            "type": "string"
+          },
+          "condition_out": {
+            "type": "string",
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              "needs_repair"
+            ]
+          },
+          "condition_returned": {
+            "type": "string",
+            "enum": [
+              "excellent",
+              "good",
+              "fair",
+              "poor",
+              "needs_repair"
+            ]
+          },
+          "return_notes": {
+            "type": "string"
           }
         }
       }
@@ -99,6 +132,13 @@
       "default": 0
     },
     "notes": {
+      "type": "string"
+    },
+    "checked_out_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "checked_out_by": {
       "type": "string"
     }
   },

@@ -22,4 +22,8 @@ export const PAGE_NAMES = [
   'PrintInvoice',
   'LocationViewer',
   'RemindersManager',
+  'BorrowedCheckIn',
+  'BorrowedItemDetails',
+  'ActivityLog',
+  'InventoryAudit',
 ];

@@ -37,6 +37,12 @@ export const handleQRCodeScan = (qrData, navigate) => {
       return;
     }
 
+    // A borrowed item's temporary tag number
+    if (/^LN-\d{2}-\d{3,}$/i.test(cleanData)) {
+      navigate(createPageUrl(`BorrowedItems?search=${encodeURIComponent(cleanData)}`));
+      return;
+    }
+
     // Check if it's an item UID
     if (cleanData.startsWith('CST-')) {
       navigate(createPageUrl(`Search?query=${encodeURIComponent(cleanData)}`));

@@ -303,6 +303,32 @@
           "quantity"
         ]
       }
+    },
+    "last_audited_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the item was last seen in a physical count"
+    },
+    "last_audited_location": {
+      "type": "string"
+    },
+    "current_rental": {
+      "type": "object",
+      "description": "Set while the item is out on a rental",
+      "properties": {
+        "order_id": {
+          "type": "string"
+        },
+        "order_number": {
+          "type": "string"
+        },
+        "renter_name": {
+          "type": "string"
+        },
+        "due_date": {
+          "type": "string"
+        }
+      }
     }
   },
   "required": [

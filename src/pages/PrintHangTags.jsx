@@ -17,6 +17,8 @@ import {
   DEFAULT_CUSTOM, LABEL_FORMATS, labelsPerPage, layoutWarning, resolveFormat,
 } from '@/lib/labelFormats';
 import { getAppUrl } from '@/utils';
+import { borrowedItemUrl } from '@/lib/itemCodes';
+import { logActivity } from '@/api/activity';
 
 // ---------------------------------------------------------------------------
 // Settings (remembered in this browser)
@@ -65,6 +67,25 @@ function loadSavedSelection() {
     return [];
   }
 }
+
+const shortDate = (value) => {
+  const text = String(value || '').slice(0, 10);
+  const [y, m, d] = text.split('-').map(Number);
+  return y && m && d ? `${m}/${d}/${String(y).slice(-2)}` : text;
+};
+
+// A borrowed item, shaped like an inventory item so the same label layout prints it.
+const loanToLabelItem = (loan) => ({
+  id: `loan:${loan.id}`,
+  _loan: loan,
+  name: loan.name + (loan.quantity > 1 ? ` (×${loan.quantity})` : ''),
+  uid: loan.tag_number || '',
+  qr_code: borrowedItemUrl(loan),
+  location: loan.storage_location || '',
+  container_id: loan.container_id || '',
+  category: loan.category,
+  condition: loan.condition_borrowed,
+});
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const titleCase = (text) => String(text || '').replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
@@ -123,7 +144,13 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
   const lineH = (pt, spacing) => (pt * spacing) / 72; // inches per line
 
   // --- lines of information -------------------------------------------------
+  const loan = item._loan || null;
   let lines = [];
+  if (loan) {
+    // Borrowed items: who owns it and when it goes back come first.
+    if (!tiny) lines.push(['Owner', loan.lender_name || '—']);
+    if (loan.due_date) lines.push(['Return by', shortDate(loan.due_date)]);
+  }
   if (!tiny) {
     const where = [item.location, containerName].filter(Boolean).join(' · ');
     if (settings.showLocation && where) lines.push(['Location', where]);
@@ -137,8 +164,12 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
   const showUidLine = settings.showUid && uidText && !(showBarcode && tiny);
   const showCodeText = showUidLine || (showBarcode && !settings.showUid && !tiny);
 
-  let header = settings.showHeader && !tiny && h >= 1 ? settings.headerText : '';
-  let logo = settings.showLogo && !tiny && h >= 1 && logoUrl ? logoUrl : '';
+  // The borrowed banner uses the long wording only where it fits on one line.
+  const bannerChars = (textW * 72) / (infoSize * 0.85 * 0.62);
+  let header = loan
+    ? (h >= 0.75 ? (bannerChars >= 32 ? 'BORROWED · NOT THEATRE PROPERTY' : 'BORROWED ITEM') : '')
+    : settings.showHeader && !tiny && h >= 1 ? settings.headerText : '';
+  let logo = !loan && settings.showLogo && !tiny && h >= 1 && logoUrl ? logoUrl : '';
 
   // Fit: keep only as many whole lines as there is room for, so nothing is
   // cut in half or runs into the barcode.
@@ -146,7 +177,7 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
   let room = textH - bottomH;
   let headerH = header || logo ? lineH(infoSize * 0.85, 1.15) + 0.02 : 0;
   const nameLineH = () => lineH(nameSize, 1.1);
-  if (settings.showName && room - headerH < nameLineH()) {
+  if (settings.showName && room - headerH < nameLineH() && !loan) {
     header = '';
     logo = '';
     headerH = 0;
@@ -233,11 +264,12 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
                 gap: '0.04in',
                 fontSize: `${infoSize * 0.85}pt`,
                 lineHeight: 1.15,
-                fontWeight: 600,
+                fontWeight: loan ? 800 : 600,
                 marginBottom: '0.02in',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
                 textOverflow: 'ellipsis',
+                ...(loan ? { background: '#000', color: '#fff', padding: '0 0.04in', letterSpacing: '0.02em' } : {}),
               }}
             >
               {logo && <img src={logo} alt="" style={{ height: `${infoSize * 1.2}pt`, width: 'auto', objectFit: 'contain' }} />}
@@ -290,6 +322,7 @@ function ItemLabel({ item, format, settings, logoUrl, containerName, showCutLine
               style={{
                 fontSize: `${codeTextSize}pt`,
                 fontFamily: 'ui-monospace, Menlo, Consolas, monospace',
+                fontWeight: loan ? 700 : 400,
                 lineHeight: 1.15,
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
@@ -316,17 +349,30 @@ export default function PrintHangTags() {
   const navigate = useNavigate();
   const location = useLocation();
   const { appSettings } = useAppSettings();
-  const { items: allItems, containers, isLoading } = useData();
+  const { items: allItems, borrowedItems, containers, isLoading } = useData();
 
   const [settings, setSettings] = useState(loadSettings);
   const [selectedIds, setSelectedIds] = useState(() => {
     const passed = location.state?.items;
     if (Array.isArray(passed) && passed.length) return passed.map((i) => i.id);
-    const fromUrl = new URLSearchParams(location.search).get('ids');
-    if (fromUrl) return fromUrl.split(',').filter(Boolean);
+    const passedLoans = location.state?.loans;
+    if (Array.isArray(passedLoans) && passedLoans.length) return passedLoans.map((l) => `loan:${l.id}`);
+    const urlParams = new URLSearchParams(location.search);
+    const fromUrl = urlParams.get('ids');
+    const loansFromUrl = urlParams.get('loans');
+    if (fromUrl || loansFromUrl) {
+      return [
+        ...(fromUrl || '').split(',').filter(Boolean),
+        ...(loansFromUrl || '').split(',').filter(Boolean).map((id) => `loan:${id}`),
+      ];
+    }
     return loadSavedSelection();
   });
   const [search, setSearch] = useState('');
+  // Which list the picker shows: our inventory, or borrowed items (temporary tags).
+  const [source, setSource] = useState(() =>
+    location.state?.loans?.length || new URLSearchParams(location.search).get('loans') ? 'loans' : 'items'
+  );
 
   useEffect(() => {
     try {
@@ -361,13 +407,22 @@ export default function PrintHangTags() {
 
   // Items passed in from another page are used straight away, even before
   // the full inventory list has loaded.
+  const loanLabels = useMemo(() => {
+    const byId = new Map((borrowedItems || []).map((l) => [l.id, l]));
+    (location.state?.loans || []).forEach((l) => {
+      if (!byId.has(l.id)) byId.set(l.id, l);
+    });
+    return [...byId.values()].map(loanToLabelItem);
+  }, [borrowedItems, location.state]);
+
   const itemsById = useMemo(() => {
     const map = new Map((allItems || []).map((i) => [i.id, i]));
     (location.state?.items || []).forEach((i) => {
       if (!map.has(i.id)) map.set(i.id, i);
     });
+    loanLabels.forEach((l) => map.set(l.id, l));
     return map;
-  }, [allItems, location.state]);
+  }, [allItems, location.state, loanLabels]);
 
   const selectedItems = useMemo(
     () => selectedIds.map((id) => itemsById.get(id)).filter(Boolean),
@@ -378,14 +433,33 @@ export default function PrintHangTags() {
 
   const searchResults = useMemo(() => {
     const term = search.trim().toLowerCase();
-    const list = (allItems || []).filter((item) => {
+    const pool =
+      source === 'loans'
+        ? loanLabels.filter((l) => l._loan.status !== 'returned' || selectedIds.includes(l.id))
+        : allItems || [];
+    const list = pool.filter((item) => {
       if (!term) return true;
-      return [item.name, item.uid, item.location, ...(item.categories || [])]
+      return [item.name, item.uid, item.location, item._loan?.lender_name, ...(item.categories || [])]
         .filter(Boolean)
         .some((value) => String(value).toLowerCase().includes(term));
     });
     return list.sort((a, b) => String(a.name || '').localeCompare(String(b.name || '')));
-  }, [allItems, search]);
+  }, [allItems, loanLabels, search, source, selectedIds]);
+
+  // Printing a borrowed item's tag is noted in its history.
+  const handlePrint = () => {
+    selectedItems
+      .filter((item) => item._loan)
+      .forEach((item) =>
+        logActivity({
+          entityType: 'BorrowedItem',
+          record: item._loan,
+          action: 'tag_printed',
+          summary: `Temporary tag printed (${format.name || 'label'})`,
+        })
+      );
+    window.print();
+  };
 
   const toggleItem = (id) =>
     setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -472,7 +546,7 @@ export default function PrintHangTags() {
             </div>
           </div>
           <Button
-            onClick={() => window.print()}
+            onClick={handlePrint}
             disabled={labelCount === 0 || Boolean(warning)}
             className="bg-primary text-primary-content hover:bg-primary-focus"
           >
@@ -494,12 +568,34 @@ export default function PrintHangTags() {
                 </button>
               )}
             </div>
+            <div className="grid grid-cols-2 gap-1 rounded-lg bg-base-200 p-1 text-sm" role="tablist">
+              {[
+                ['items', 'Inventory'],
+                ['loans', 'Borrowed (temporary tags)'],
+              ].map(([key, text]) => (
+                <button
+                  key={key}
+                  type="button"
+                  role="tab"
+                  aria-selected={source === key}
+                  onClick={() => setSource(key)}
+                  className={`rounded-md px-2 py-1.5 ${source === key ? 'bg-base-100 font-semibold shadow-sm' : 'text-base-content/70'}`}
+                >
+                  {text}
+                </button>
+              ))}
+            </div>
+            {source === 'loans' && (
+              <p className="text-xs text-base-content/70">
+                Borrowed tags say “BORROWED · NOT THEATRE PROPERTY” with the owner, return date and tag number, so they are never mixed up with our stock.
+              </p>
+            )}
             <div className="relative">
               <Search className="pointer-events-none absolute left-2.5 top-2.5 h-4 w-4 text-base-content/50" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Find items by name, UID, location…"
+                placeholder={source === 'loans' ? 'Find by name, tag number, lender…' : 'Find items by name, UID, location…'}
                 className="h-9 bg-base-100 pl-8"
               />
             </div>

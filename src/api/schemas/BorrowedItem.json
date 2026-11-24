@@ -127,6 +127,18 @@
           "upload_date": {
             "type": "string",
             "format": "date"
+          },
+          "stage": {
+            "type": "string",
+            "enum": [
+              "check_in",
+              "return",
+              "other"
+            ],
+            "description": "When the photo was taken"
+          },
+          "shows_damage": {
+            "type": "boolean"
           }
         }
       },
@@ -144,6 +156,86 @@
       "type": "boolean",
       "default": false,
       "description": "Whether a return reminder has been sent"
+    },
+    "tag_number": {
+      "type": "string",
+      "description": "Temporary ID printed on the borrowed tag, e.g. LN-26-0007. Unique."
+    },
+    "quantity": {
+      "type": "number",
+      "default": 1,
+      "description": "How many of this item were borrowed"
+    },
+    "pieces": {
+      "type": "array",
+      "description": "Every separate piece that must come back (e.g. jacket, vest, 2 cufflinks)",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "notes": {
+            "type": "string"
+          },
+          "returned": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "lender_reference": {
+      "type": "string",
+      "description": "The lender's own ID, invoice or loan number"
+    },
+    "replacement_value": {
+      "type": "number",
+      "description": "Value the lender would charge if lost or damaged"
+    },
+    "agreement_on_file": {
+      "type": "boolean",
+      "default": false,
+      "description": "Signed loan agreement / receipt is on file"
+    },
+    "lender_acknowledged_condition": {
+      "type": "boolean",
+      "default": false,
+      "description": "Lender agreed with the condition noted at check-in"
+    },
+    "care_instructions": {
+      "type": "string",
+      "description": "Special handling, cleaning or use restrictions"
+    },
+    "condition_notes_borrowed": {
+      "type": "string",
+      "description": "Existing wear or damage noted at check-in"
+    },
+    "condition_notes_returned": {
+      "type": "string",
+      "description": "Condition notes at return"
+    },
+    "storage_location": {
+      "type": "string",
+      "description": "Where the item is kept while we have it"
+    },
+    "container_id": {
+      "type": "string"
+    },
+    "checked_in_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "returned_to": {
+      "type": "string",
+      "description": "Person at the lender who took the item back"
+    },
+    "return_discrepancy": {
+      "type": "boolean",
+      "default": false,
+      "description": "Something was missing or damaged at return"
     }
   },
   "required": [

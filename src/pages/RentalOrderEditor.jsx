@@ -20,6 +20,12 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import { PackageCheck, PackageOpen, AlertTriangle } from 'lucide-react';
+import {
+  OUT_STATUSES, checkInFields, checkOutFields, findBookingConflicts, syncRentalInventory,
+} from '@/lib/rentals';
+import ActivityTimeline from '../components/shared/ActivityTimeline';
 
 const PENDING_RENTAL_ITEMS_KEY = 'rental-items';
 
@@ -58,6 +64,11 @@ export default function RentalOrderEditor() {
   const [isSavingRenter, setIsSavingRenter] = useState(false);
   
   const [itemSearch, setItemSearch] = useState('');
+  // The order as last saved, so saving can tell what changed for the items.
+  const [savedOrder, setSavedOrder] = useState(null);
+  const [otherOrders, setOtherOrders] = useState([]);
+  const [returns, setReturns] = useState({});
+  const [isCheckingIn, setIsCheckingIn] = useState(false);
   const [isItemPopoverOpen, setIsItemPopoverOpen] = useState(false);
 
   const rentalDays = useMemo(() => {
@@ -72,12 +83,14 @@ export default function RentalOrderEditor() {
     setIsLoading(true);
     setError(null);
     try {
-      const [rentersData, itemsData] = await Promise.all([
+      const [rentersData, itemsData, ordersData] = await Promise.all([
         Renter.list('-created_date'),
-        InventoryItem.filter({ status: 'available' })
+        InventoryItem.filter({ status: 'available' }),
+        RentalOrder.list().catch(() => []),
       ]);
       setRenters(rentersData);
       setInventoryItems(itemsData);
+      setOtherOrders(ordersData);
 
       let initialOrderData = {
         renter_id: '',
@@ -99,6 +112,7 @@ export default function RentalOrderEditor() {
 
       if (orderId) {
         const existingOrder = await RentalOrder.get(orderId);
+        setSavedOrder(existingOrder);
         initialOrderData = {
           ...existingOrder,
           rental_start_date: new Date(existingOrder.rental_start_date),
@@ -240,12 +254,15 @@ export default function RentalOrderEditor() {
     setIsSaving(true);
     setError(null);
     try {
+      let saved;
       if (orderId) {
-        await RentalOrder.update(orderId, order);
+        saved = await RentalOrder.update(orderId, order);
       } else {
-        await RentalOrder.create(order);
+        saved = await RentalOrder.create(order);
         clearPendingRentalItems();
       }
+      // Mark items rented / available to match the order.
+      await syncRentalInventory(savedOrder, saved);
       navigate(createPageUrl('RentalsDashboard'));
     } catch (err) {
       console.error('Failed to save order:', err);
@@ -254,6 +271,61 @@ export default function RentalOrderEditor() {
       setIsSaving(false);
     }
   };
+
+  const itemsById = useMemo(() => new Map(inventoryItems.map((i) => [i.id, i])), [inventoryItems]);
+  const conflicts = useMemo(() => findBookingConflicts(order, otherOrders), [order, otherOrders]);
+  const persistedOut = savedOrder && OUT_STATUSES.includes(savedOrder.status);
+  const canCheckOut = savedOrder && ['quote', 'confirmed'].includes(savedOrder.status) && (order?.line_items?.length || 0) > 0;
+
+  // Save the order with some fields changed, then bring the items in line.
+  const applyAndSave = async (fields) => {
+    const next = { ...order, ...fields };
+    const saved = await RentalOrder.update(orderId, next);
+    await syncRentalInventory(savedOrder, saved);
+    setSavedOrder(saved);
+    setOrder({
+      ...saved,
+      rental_start_date: new Date(saved.rental_start_date),
+      rental_end_date: new Date(saved.rental_end_date),
+    });
+    return saved;
+  };
+
+  const handleCheckOut = async () => {
+    if (conflicts.length && !window.confirm('Some items are booked on another order for these dates. Check out anyway?')) return;
+    setIsSaving(true);
+    setError(null);
+    try {
+      await applyAndSave(await checkOutFields(order, itemsById));
+    } catch (err) {
+      console.error(err);
+      setError('Could not check the order out. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleCheckIn = async () => {
+    const chosen = Object.fromEntries(
+      Object.entries(returns)
+        .filter(([, r]) => r.selected)
+        .map(([index, r]) => [index, { condition_returned: r.condition || 'good', return_notes: r.notes || '' }])
+    );
+    if (!Object.keys(chosen).length) return;
+    setIsCheckingIn(true);
+    setError(null);
+    try {
+      await applyAndSave(await checkInFields(order, chosen));
+      setReturns({});
+    } catch (err) {
+      console.error(err);
+      setError('Could not check the items in. Please try again.');
+    } finally {
+      setIsCheckingIn(false);
+    }
+  };
+
+  const setReturn = (index, patch) => setReturns((prev) => ({ ...prev, [index]: { ...prev[index], ...patch } }));
 
   const handleAddNewRenter = async (e) => {
       e.preventDefault();
@@ -455,6 +527,81 @@ export default function RentalOrderEditor() {
                 </Popover>
             </div>
             
+            {conflicts.length > 0 && (
+              <Alert className="bg-warning/10 border-warning/50">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertTitle>Double booking</AlertTitle>
+                <AlertDescription>
+                  <ul className="list-disc pl-4">
+                    {conflicts.map((c, i) => (
+                      <li key={i}>
+                        {c.itemName} is also on {c.order.order_number || c.order.quote_number || 'another order'} for {c.order.renter_name || 'another renter'} ({format(new Date(c.order.rental_start_date), 'MMM d')} – {format(new Date(c.order.rental_end_date), 'MMM d')}).
+                      </li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+            )}
+
+            {canCheckOut && (
+              <div className="rounded-lg border border-base-300 bg-base-100 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div>
+                  <p className="font-semibold flex items-center gap-2"><PackageOpen className="w-4 h-4 text-primary" /> Ready to go out?</p>
+                  <p className="text-sm text-base-content/70">Checking out marks every item as Rented, records each item’s condition, and starts the return clock.</p>
+                </div>
+                <Button onClick={handleCheckOut} disabled={isSaving}>
+                  {isSaving ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PackageOpen className="w-4 h-4 mr-2" />} Check out now
+                </Button>
+              </div>
+            )}
+
+            {persistedOut && (
+              <div className="rounded-lg border border-base-300 bg-base-100 p-4 space-y-3">
+                <div>
+                  <p className="font-semibold flex items-center gap-2"><PackageCheck className="w-4 h-4 text-primary" /> Check in returned items</p>
+                  <p className="text-sm text-base-content/70">
+                    Tick what came back and note its condition. Items in poor condition or needing repair go to Maintenance instead of Available.
+                  </p>
+                </div>
+                <div className="divide-y divide-base-300 border border-base-300 rounded-lg">
+                  {order.line_items.map((line, index) => {
+                    const r = returns[index] || {};
+                    if (line.returned) {
+                      return (
+                        <div key={index} className="px-3 py-2 text-sm flex justify-between gap-2 text-base-content/70">
+                          <span>{line.item_name}</span>
+                          <span className="text-success">Returned{line.returned_date ? ` ${format(new Date(line.returned_date), 'MMM d')}` : ''}{line.condition_returned ? ` · ${line.condition_returned.replace('_', ' ')}` : ''}</span>
+                        </div>
+                      );
+                    }
+                    return (
+                      <div key={index} className="px-3 py-2 grid gap-2 sm:grid-cols-[1fr_150px_1fr] items-center">
+                        <label className="flex items-center gap-2 text-sm">
+                          <Checkbox checked={Boolean(r.selected)} onCheckedChange={(c) => setReturn(index, { selected: Boolean(c), condition: r.condition || line.condition_out || 'good' })} />
+                          {line.item_name}{line.quantity > 1 ? ` × ${line.quantity}` : ''}
+                        </label>
+                        <Select value={r.condition || line.condition_out || 'good'} onValueChange={(v) => setReturn(index, { condition: v, selected: true })}>
+                          <SelectTrigger className="h-8"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            {['excellent', 'good', 'fair', 'poor', 'needs_repair'].map((c) => (
+                              <SelectItem key={c} value={c}>{c.replace('_', ' ')}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Input className="h-8" placeholder="Notes (damage, missing parts…)" value={r.notes || ''} onChange={(e) => setReturn(index, { notes: e.target.value })} />
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleCheckIn} disabled={isCheckingIn || !Object.values(returns).some((r) => r.selected)}>
+                    {isCheckingIn ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <PackageCheck className="w-4 h-4 mr-2" />}
+                    Check in selected
+                  </Button>
+                </div>
+              </div>
+            )}
+
             {/* Totals Section */}
             <div className="flex justify-end">
                 <div className="w-full md:w-1/2 space-y-4">
@@ -472,6 +619,13 @@ export default function RentalOrderEditor() {
                 <Label>Notes</Label>
                 <Textarea value={order.notes} onChange={(e) => updateOrderField('notes', e.target.value)} />
             </div>
+
+            {orderId && (
+              <div>
+                <Label className="mb-2 block">History</Label>
+                <ActivityTimeline recordId={orderId} emptyText="No history recorded for this order yet." />
+              </div>
+            )}
 
             {/* Actions */}
             <div className="flex justify-end gap-3 pt-4">

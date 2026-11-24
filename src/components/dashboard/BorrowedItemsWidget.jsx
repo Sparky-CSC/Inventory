@@ -2,6 +2,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { createPageUrl } from "@/utils";
+import { isLoanOverdue } from "@/lib/itemCodes";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -61,14 +62,14 @@ export default function BorrowedItemsWidget({ borrowedItems, stats, isLoading })
             ))
           ) : borrowedItems.length > 0 ? (
             borrowedItems.map((item) => {
-              const isOverdue = item.status === 'borrowed' && item.due_date && new Date(item.due_date) < new Date();
+              const isOverdue = isLoanOverdue(item);
               const status = isOverdue ? 'overdue' : item.status;
               
               return (
                 <div 
                   key={item.id} 
                   className="p-6 hover:bg-base-300/50 transition-colors duration-200 cursor-pointer group"
-                  onClick={() => navigate(createPageUrl(`BorrowedItems?edit=${item.id}`))}
+                  onClick={() => navigate(createPageUrl(`BorrowedItemDetails?id=${item.id}`))}
                 >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center shadow-md group-hover:shadow-lg transition-shadow">

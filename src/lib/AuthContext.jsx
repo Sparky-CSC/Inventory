@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import backend from '@/api/backends';
 import { IS_LOCAL_MODE } from '@/api/config';
+import { resetActivityUser } from '@/api/activity';
 
 const AuthContext = createContext(null);
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
       if (userId) {
         if (lastUserId.current !== userId) {
           lastUserId.current = userId;
+          resetActivityUser();
           setSessionVersion((v) => v + 1);
         }
         setNeedsSetup(false);

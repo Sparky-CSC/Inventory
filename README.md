@@ -229,6 +229,39 @@ so reprint labels when convenient — new labels point at this site.
 
 ## 6. Everyday notes
 
+- **Checking in borrowed items.** *Borrowed Items → Check in item* walks
+  through six steps before anything goes into storage: the lender and loan
+  terms (return date, replacement value, loan agreement on file), the item and
+  every separate piece, photos (at least one; mark any that show damage), the
+  condition on arrival (agreed with the lender), and where it is stored. Each
+  loan gets a temporary tag number like `LN-26-0007` (year + running number);
+  print its tag straight from the last screen. Borrowed tags carry a black
+  "BORROWED" banner, the owner and the return date, so they are never mistaken
+  for theatre stock. Scanning one opens the loan's page.
+- **Returning borrowed items.** *Return to lender* makes you tick off every
+  piece, compare the item with its check-in photos, take return photos and
+  record who at the lender received it. Missing pieces or new damage must be
+  explained and are flagged on the loan.
+- **Activity log.** Every add, edit, move, status or condition change, check-in,
+  return, rental and count is recorded with who did it and when — on each
+  item's *History* tab, each loan's page, and the *Activity Log* page (with
+  filters and CSV export). In shared mode the log can only be added to; only an
+  administrator can remove entries.
+- **Inventory counts.** *Inventory Count* checks one location (or container)
+  at a time: scan labels with the camera or a handheld USB/Bluetooth scanner and
+  the page lists what is missing, what is in the wrong place (optionally moved
+  here when you finish) and codes it does not know. Each finished count is saved
+  with a downloadable report, and every item found gets a "last counted" date.
+  A count in progress survives leaving the page.
+- **Rental check-out and check-in.** On a confirmed order, *Check out now*
+  marks its items Rented. *Check in returned items* takes items back one by one
+  with their condition; items in poor condition or needing repair go to
+  Maintenance. The order warns when an item is booked on another order for the
+  same days.
+- **Unique IDs.** New items get a random UID with no look-alike letters, and a
+  UID already used by another item is refused. *Administration → Check item
+  IDs* finds items with a missing or shared UID (and loans without a tag
+  number), fixes them and offers to print new labels.
 - **Labels and hang tags.** *Print Labels* in the sidebar (or *Print Tags* /
   *Print Hang Tag* on items) opens the label designer: pick items, a size —
   hang tags on cardstock, Avery sticker sheets (5160, 5161, 5163, 5164, 5167,

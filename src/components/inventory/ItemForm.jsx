@@ -5,6 +5,7 @@ import { Location } from "@/entities/Location";
 import { Category } from "@/entities/Category";
 import { Subcategory } from "@/entities/Subcategory";
 import { UploadFile } from "@/integrations/Core";
+import { generateItemUid } from "@/lib/itemCodes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -93,12 +94,8 @@ const emptyFormState = {
   variants: [],
 };
 
-const generateUID = (category = 'item') => {
-    const catPrefix = category.substring(0, 3).toUpperCase();
-    const timestamp = Date.now().toString(36).slice(-5).toUpperCase();
-    const randomPart = Math.random().toString(36).substring(2, 7).toUpperCase();
-    return `CST-${catPrefix}-${timestamp}-${randomPart}`;
-};
+// New UIDs use the shared generator (random, no look-alike letters).
+const generateUID = (category = 'GEN') => generateItemUid(category);
 
 export default function ItemForm({ item: initialData, onSubmit, onCancel }) {
   const [containers, setContainers] = useState([]);

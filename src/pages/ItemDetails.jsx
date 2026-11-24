@@ -32,6 +32,7 @@ import { format } from 'date-fns';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"; // New import for Tabs
 import BackButton from '../components/shared/BackButton';
+import ActivityTimeline from '../components/shared/ActivityTimeline';
 
 export default function ItemDetails() {
   const navigate = useNavigate();
@@ -453,6 +454,16 @@ export default function ItemDetails() {
                       ))}
                     </div>
                   ) : <p className="text-base-content/70 text-sm">No production history recorded for this item.</p>}
+                </div>
+                <div className="mt-6">
+                  <h4 className="font-semibold text-base-content mb-2">Activity</h4>
+                  {(item.last_audited_at || item.current_rental) && (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-2 text-sm mb-4">
+                      {item.last_audited_at && renderKeyValue('Last counted', `${format(new Date(item.last_audited_at), 'PPP')}${item.last_audited_location ? ` in ${item.last_audited_location}` : ''}`)}
+                      {item.current_rental && renderKeyValue('Out on rental', `${item.current_rental.renter_name || 'Renter'}${item.current_rental.due_date ? `, due ${format(new Date(item.current_rental.due_date), 'PP')}` : ''}`)}
+                    </div>
+                  )}
+                  <ActivityTimeline recordId={item.id} emptyText="No activity recorded yet. Moves, status changes, rentals and counts will appear here." />
                 </div>
                 <div className="mt-6">
                    <h4 className="font-semibold text-base-content mb-2">Notes</h4>

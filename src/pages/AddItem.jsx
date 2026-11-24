@@ -4,6 +4,7 @@ import ItemForm from '../components/inventory/ItemForm';
 import { InventoryItem } from '@/entities/InventoryItem';
 import { useOffline } from '../components/shared/OfflineManager';
 import BackButton from '../components/shared/BackButton';
+import { generateItemUid } from '@/lib/itemCodes';
 
 export default function AddItem() {
   const navigate = useNavigate();
@@ -14,10 +15,10 @@ export default function AddItem() {
   const pageTitle = editItem ? "Edit Item" : "Add Item";
 
   const handleSubmit = async (formData) => {
-    // Generate a UID if one doesn't exist
+    // Every item needs its own UID: it is what the printed label points at.
     const itemData = {
       ...formData,
-      uid: formData.uid || `UID-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      uid: (formData.uid || '').trim() || generateItemUid(formData.categories?.[0] || formData.category),
     };
 
     if (!isOnline) {
@@ -31,6 +32,18 @@ export default function AddItem() {
     }
 
     try {
+      // No two items may share a UID, or scanning one label would open the other.
+      const sameUid = (await InventoryItem.filter({ uid: itemData.uid })).filter((other) => other.id !== editItem?.id);
+      if (sameUid.length) {
+        if (editItem && editItem.uid === itemData.uid) {
+          // An older duplicate: leave it; the ID check in Administration sorts these out.
+        } else if (editItem) {
+          alert(`The UID ${itemData.uid} already belongs to “${sameUid[0].name}”. Choose a different UID.`);
+          return;
+        } else {
+          itemData.uid = generateItemUid(itemData.categories?.[0] || itemData.category);
+        }
+      }
       if (editItem) {
         await InventoryItem.update(editItem.id, itemData);
       } else {

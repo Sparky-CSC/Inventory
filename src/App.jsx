@@ -34,6 +34,10 @@ const InvoiceDetails = lazy(() => import('./pages/InvoiceDetails'));
 const PrintInvoice = lazy(() => import('./pages/PrintInvoice'));
 const LocationViewer = lazy(() => import('./pages/LocationViewer'));
 const RemindersManager = lazy(() => import('./pages/RemindersManager'));
+const BorrowedCheckIn = lazy(() => import('./pages/BorrowedCheckIn'));
+const BorrowedItemDetails = lazy(() => import('./pages/BorrowedItemDetails'));
+const ActivityLog = lazy(() => import('./pages/ActivityLog'));
+const InventoryAudit = lazy(() => import('./pages/InventoryAudit'));
 
 const PageLoading = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-base-100">
@@ -87,6 +91,10 @@ const AuthenticatedApp = () => {
       <Route path="/PrintInvoice" element={<Layout currentPageName="PrintInvoice"><PrintInvoice /></Layout>} />
       <Route path="/LocationViewer" element={<Layout currentPageName="Manage Locations"><LocationViewer /></Layout>} />
       <Route path="/RemindersManager" element={<Layout currentPageName="Reminders"><RemindersManager /></Layout>} />
+      <Route path="/BorrowedCheckIn" element={<Layout currentPageName="Borrowed Items"><BorrowedCheckIn /></Layout>} />
+      <Route path="/BorrowedItemDetails" element={<Layout currentPageName="Borrowed Items"><BorrowedItemDetails /></Layout>} />
+      <Route path="/ActivityLog" element={<Layout currentPageName="Activity Log"><ActivityLog /></Layout>} />
+      <Route path="/InventoryAudit" element={<Layout currentPageName="Inventory Count"><InventoryAudit /></Layout>} />
       <Route path="*" element={<PageNotFound />} />
     </Routes>
     </Suspense>

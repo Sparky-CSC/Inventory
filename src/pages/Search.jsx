@@ -24,6 +24,7 @@ import { createPageUrl } from '@/utils';
 import { useAppSettings } from '../components/shared/AppSettingsContext';
 import BackButton from '../components/shared/BackButton';
 import { useUserData } from '../components/shared/UserDataContext';
+import { useData } from '../components/shared/DataManager';
 
 const categoryOptions = [
   { value: "costume", label: "Costume", icon: Shirt },
@@ -70,6 +71,7 @@ const styleOptions = [
 export default function Search() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { borrowedItems: allBorrowed = [] } = useData();
   const [items, setItems] = useState([]);
   const [containers, setContainers] = useState([]);
   const [locations, setLocations] = useState([]);
@@ -766,6 +768,29 @@ export default function Search() {
           </CardHeader>
           {renderFilterContent()}
         </Card>
+
+        {/* Borrowed items that match (they are not part of our inventory) */}
+        {(() => {
+          const term = (filters.query || '').trim().toLowerCase();
+          if (term.length < 3) return null;
+          const matches = allBorrowed.filter((b) =>
+            [b.name, b.tag_number, b.lender_name, b.description].filter(Boolean).some((v) => String(v).toLowerCase().includes(term))
+          ).slice(0, 6);
+          if (!matches.length) return null;
+          return (
+            <div className="mt-6 rounded-xl border border-warning/50 bg-warning/10 p-4">
+              <p className="font-semibold text-sm mb-2">Borrowed items (not theatre property) matching “{filters.query}”</p>
+              <div className="flex flex-wrap gap-2">
+                {matches.map((b) => (
+                  <Button key={b.id} size="sm" variant="outline" onClick={() => navigate(createPageUrl(`BorrowedItemDetails?id=${b.id}`))}>
+                    <span className="font-mono mr-2">{b.tag_number || 'No tag'}</span>{b.name}
+                    {b.status === 'returned' ? ' (returned)' : ''}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Results */}
         <div className="mt-8">

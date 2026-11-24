@@ -166,16 +166,47 @@ create policy "records_insert" on public.records
   for insert to authenticated
   with check (public.can_write_entity(entity));
 
+-- The activity log is append-only: anyone may add entries, but only an
+-- administrator may change or remove them (for restoring a backup).
 drop policy if exists "records_update" on public.records;
 create policy "records_update" on public.records
   for update to authenticated
-  using (public.can_write_entity(entity))
-  with check (public.can_write_entity(entity));
+  using (public.can_write_entity(entity) and (entity <> 'ActivityLog' or (select public.is_admin())))
+  with check (public.can_write_entity(entity) and (entity <> 'ActivityLog' or (select public.is_admin())));
 
 drop policy if exists "records_delete" on public.records;
 create policy "records_delete" on public.records
   for delete to authenticated
-  using (public.can_write_entity(entity));
+  using (public.can_write_entity(entity) and (entity <> 'ActivityLog' or (select public.is_admin())));
+
+-- New records are stamped with the signed-in person's email, so nobody can add
+-- records (or activity log entries) in someone else's name. Administrators
+-- restoring a backup keep the original names.
+create or replace function public.stamp_record_creator()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_email text := coalesce(auth.jwt() ->> 'email', '');
+begin
+  if v_email <> '' and not public.is_admin() then
+    new.created_by := v_email;
+    if new.entity = 'ActivityLog' then
+      new.data := jsonb_set(coalesce(new.data, '{}'::jsonb), '{user_email}', to_jsonb(v_email));
+      new.created_date := now();
+    end if;
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists records_stamp_creator on public.records;
+create trigger records_stamp_creator
+  before insert on public.records
+  for each row execute function public.stamp_record_creator();
+revoke execute on function public.stamp_record_creator() from public, anon, authenticated;
 
 -- Everyone can read their own profile; active people can see the staff list.
 -- Profiles are only ever changed through update_profile() below.

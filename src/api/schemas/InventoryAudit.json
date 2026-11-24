@@ -1,0 +1,108 @@
+{
+  "name": "InventoryAudit",
+  "type": "object",
+  "description": "A physical count of one location (cycle count): what was expected, found, misplaced and missing.",
+  "properties": {
+    "location": {
+      "type": "string"
+    },
+    "container_id": {
+      "type": "string"
+    },
+    "scope_label": {
+      "type": "string"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "in_progress",
+        "completed"
+      ],
+      "default": "in_progress"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "performed_by": {
+      "type": "string"
+    },
+    "expected_count": {
+      "type": "number"
+    },
+    "found_count": {
+      "type": "number"
+    },
+    "missing_count": {
+      "type": "number"
+    },
+    "misplaced_count": {
+      "type": "number"
+    },
+    "unknown_count": {
+      "type": "number"
+    },
+    "found_ids": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "missing": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "misplaced": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "uid": {
+            "type": "string"
+          },
+          "recorded_location": {
+            "type": "string"
+          },
+          "moved": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "unknown_codes": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "notes": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "status"
+  ]
+}

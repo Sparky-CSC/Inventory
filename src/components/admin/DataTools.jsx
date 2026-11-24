@@ -17,6 +17,7 @@ import {
   rehostExternalPhotos,
   restoreBackup,
 } from '@/api/dataTransfer';
+import IdCheck from './IdCheck';
 
 const cardClass = 'bg-base-200/50 backdrop-blur-sm shadow-md';
 
@@ -42,6 +43,8 @@ const ENTITY_LABELS = {
   FavoriteItem: 'Favorites',
   UserDashboard: 'Dashboard layouts',
   Department: 'Departments',
+  ActivityLog: 'Activity log',
+  InventoryAudit: 'Inventory counts',
 };
 
 function Progress({ progress }) {
@@ -249,6 +252,7 @@ export default function DataTools() {
 
   return (
     <div className="space-y-8">
+      <IdCheck />
       {/* Where the data lives */}
       <Card className={cardClass}>
         <CardHeader>

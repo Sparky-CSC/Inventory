@@ -23,7 +23,7 @@ export function getAppUrl(pageName = '') {
 }
 
 // Pages that printed QR labels can point at.
-const LABEL_PAGES = ['ItemDetails', 'LocationViewer', 'Inventory', 'Search'];
+const LABEL_PAGES = ['ItemDetails', 'BorrowedItemDetails', 'LocationViewer', 'Inventory', 'Search'];
 
 /**
  * If `text` is a link into this app (or into the old Base44 copy of it),

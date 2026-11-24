@@ -30,6 +30,7 @@ export const STORAGE_BUCKET = 'uploads';
 
 // Every data type the app stores (matches the files in ./schemas).
 export const ENTITY_NAMES = [
+  'ActivityLog',
   'AppSettings',
   'BorrowedItem',
   'Category',
@@ -37,6 +38,7 @@ export const ENTITY_NAMES = [
   'Department',
   'ExpendableItem',
   'FavoriteItem',
+  'InventoryAudit',
   'InventoryItem',
   'Invoice',
   'Location',

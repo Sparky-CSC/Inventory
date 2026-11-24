@@ -9,6 +9,7 @@ import { Edit, Trash2, FileText, Plus, Calendar, DollarSign, User,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { createPageUrl } from '@/utils';
+import { syncRentalInventory } from '@/lib/rentals';
 import { RentalOrder } from '@/entities/RentalOrder';
 import { Invoice } from '@/entities/Invoice';
 import { useUserData } from '../shared/UserDataContext';
@@ -66,6 +67,9 @@ export default function RentalOrderList({ orders, onOrderDeleted, onCreateNew, o
 
     setDeletingId(orderId);
     try {
+      // Give back any items this order was holding before it disappears.
+      const order = orders.find((o) => o.id === orderId);
+      if (order) await syncRentalInventory(order, { ...order, status: 'cancelled' });
       await RentalOrder.delete(orderId);
       onOrderDeleted(orderId);
     } catch (error) {

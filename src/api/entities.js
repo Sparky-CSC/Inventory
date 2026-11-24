@@ -12,6 +12,7 @@
 import backend from './backends';
 import { ENTITY_NAMES } from './config';
 import { emitDataChanged } from './events';
+import { LOGGED_ENTITIES, logCreated, logDeleted, logUpdated } from './activity';
 import {
   SCHEMAS,
   applyDefaults,
@@ -26,6 +27,10 @@ import {
 const DEFAULT_SORT = '-created_date';
 
 function createEntity(entityName) {
+  // Changes to these record types are written to the activity log.
+  const isLogged = LOGGED_ENTITIES.includes(entityName);
+  const readQuietly = (id) => backend.getRecord(entityName, id).catch(() => null);
+
   // New records always get a fresh id and timestamps …
   const prepareNew = (data) => ({
     data: applyDefaults(entityName, stripSystemFields(data || {})),
@@ -66,9 +71,14 @@ function createEntity(entityName) {
       return backend.getRecord(entityName, id);
     },
 
-    async create(data) {
+    /**
+     * Add a record. `options.activity` ({ action, summary, notes, relatedId })
+     * says what happened, for the activity log.
+     */
+    async create(data, options = {}) {
       const [record] = await backend.insertRecords(entityName, [prepareNew(data)]);
       emitDataChanged(entityName, 'create', record);
+      if (isLogged) logCreated(entityName, record, options.activity);
       return record;
     },
 
@@ -90,15 +100,20 @@ function createEntity(entityName) {
     },
 
     /** Changes only the fields given; everything else on the record is kept. */
-    async update(id, data) {
-      const record = await backend.updateRecord(entityName, id, stripSystemFields(data));
+    async update(id, data, options = {}) {
+      const patch = stripSystemFields(data);
+      const before = isLogged ? await readQuietly(id) : null;
+      const record = await backend.updateRecord(entityName, id, patch);
       emitDataChanged(entityName, 'update', record);
+      if (isLogged) logUpdated(entityName, before, record, patch, options.activity);
       return record;
     },
 
-    async delete(id) {
+    async delete(id, options = {}) {
+      const before = isLogged ? await readQuietly(id) : null;
       const result = await backend.deleteRecord(entityName, id);
       emitDataChanged(entityName, 'delete', { id });
+      if (isLogged) logDeleted(entityName, before || { id }, options.activity);
       return result;
     },
 
@@ -116,6 +131,7 @@ function createEntity(entityName) {
 export const entities = Object.fromEntries(ENTITY_NAMES.map((name) => [name, createEntity(name)]));
 
 export const {
+  ActivityLog,
   AppSettings,
   BorrowedItem,
   Category,
@@ -123,6 +139,7 @@ export const {
   Department,
   ExpendableItem,
   FavoriteItem,
+  InventoryAudit,
   InventoryItem,
   Invoice,
   Location,

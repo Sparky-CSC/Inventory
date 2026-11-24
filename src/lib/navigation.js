@@ -3,6 +3,7 @@
 
 import {
   LayoutDashboard, Package, List, Home, Search as SearchIcon, Truck, ArrowRightLeft, Bell, Tags,
+  ClipboardList, History,
 } from 'lucide-react';
 
 export const MAIN_NAV_LINKS = [
@@ -15,6 +16,8 @@ export const MAIN_NAV_LINKS = [
   { name: 'Borrowed Items', page: 'BorrowedItems', icon: ArrowRightLeft },
   { name: 'Reminders', page: 'RemindersManager', icon: Bell },
   { name: 'Print Labels', page: 'PrintHangTags', icon: Tags },
+  { name: 'Inventory Count', page: 'InventoryAudit', icon: ClipboardList },
+  { name: 'Activity Log', page: 'ActivityLog', icon: History },
 ];
 
 // Pages that can be chosen as the first page after signing in.
